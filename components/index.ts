@@ -23,7 +23,7 @@
 import "./generatedPeacockRequireTable"
 
 // load flags as soon as possible
-import { getFlag, loadFlags } from "./flags"
+import { getFlag, loadFlags, saveFlags } from "./flags"
 
 loadFlags()
 
@@ -516,7 +516,7 @@ const PEECOCK_ART = `
 ░░░░░        ░░░░░░░░░░ ░░░░░░░░░░   ░░░░░░░░░     ░░░░░░░      ░░░░░░░░░  ░░░░░   ░░░░
 `
 
-function startServer(options: { hmr: boolean; pluginDevHost: boolean }): void {
+async function startServer(options: { hmr: boolean; pluginDevHost: boolean }): Promise<void> {
     checkForUpdates()
 
     if (!IS_LAUNCHER) {
@@ -593,8 +593,11 @@ function startServer(options: { hmr: boolean; pluginDevHost: boolean }): void {
 
     // once contracts directory is present, we are clear to boot
     loadouts.init()
-    controller.boot(options.pluginDevHost)
+    await controller.boot(options.pluginDevHost)
 
+    // all plugins had a chance to provide their flags now
+    saveFlags()
+    
     const httpServer = http.createServer(app)
 
     // @ts-expect-error Non-matching method sig
