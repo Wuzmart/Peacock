@@ -19,7 +19,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
+import { existsSync, mkdirSync, writeFileSync } from "fs"
 import { join } from "path"
 import { log, LogLevel } from "./loggingInterop"
 
@@ -29,9 +29,9 @@ import FilterData from "../static/FilterData.json"
 import LocationsData from "../static/LocationsData.json"
 import GameChangerProperties from "../static/GameChangerProperties.json"
 import allunlockables from "../static/allunlockables.json"
-import connectionConfigTemplate from "../static/config.json"
-import onlineconfig from "../static/onlineconfig.json"
-import privacypolicy from "../static/privacypolicy.json"
+import ServerVersionConfig from "../static/ServerVersionConfig.json"
+import OnlineConfig from "../static/OnlineConfig.json"
+import PrivacyPolicy from "../static/PrivacyPolicy.json"
 import UserDefault from "../static/UserDefault.json"
 import AgencyPickups from "../static/AgencyPickups.json"
 import Entrances from "../static/Entrances.json"
@@ -77,7 +77,6 @@ import LegacySaveMenuTemplate from "../static/LegacySaveMenuTemplate.json"
 import LegacyLoadMenuTemplate from "../static/LegacyLoadMenuTemplate.json"
 import LegacyLookupContractByIdTemplate from "../static/LegacyLookupContractByIdTemplate.json"
 import EiderDashboard from "../static/EiderDashboard.json"
-import PersistentBools from "../static/PersistentBools.json"
 import H2allunlockables from "../static/H2allunlockables.json"
 import H2DestinationsData from "../static/H2DestinationsData.json"
 import H2StoreData from "../static/H2StoreData.json"
@@ -85,6 +84,7 @@ import H2ContractSearchResponseTemplate from "../static/H2ContractSearchResponse
 import H2LocationsData from "../static/H2LocationsData.json"
 import H2FilterData from "../static/H2FilterData.json"
 import H2DashboardTemplate from "../static/H2DashboardTemplate.json"
+import H2LookupContractTemplate from "../static/H2LookupContractTemplate.json"
 import FrankensteinHubTemplate from "../static/FrankensteinHubTemplate.json"
 import FrankensteinMmSpTemplate from "../static/FrankensteinMmSpTemplate.json"
 import FrankensteinMmMpTemplate from "../static/FrankensteinMmMpTemplate.json"
@@ -92,6 +92,8 @@ import FrankensteinScoreOverviewTemplate from "../static/FrankensteinScoreOvervi
 import FrankensteinPlanningTemplate from "../static/FrankensteinPlanningTemplate.json"
 import Videos from "../static/Videos.json"
 import ChallengeLocationTemplate from "../static/ChallengeLocationTemplate.json"
+import H2ChallengeLocationTemplate from "../static/H2ChallengeLocationTemplate.json"
+import LegacyChallengeLocationTemplate from "../static/LegacyChallengeLocationTemplate.json"
 import ReportTemplate from "../static/ReportTemplate.json"
 import ContractSearchPageTemplate from "../static/ContractSearchPageTemplate.json"
 import ContractSearchPaginateTemplate from "../static/ContractSearchPaginateTemplate.json"
@@ -99,17 +101,23 @@ import ContractSearchResponseTemplate from "../static/ContractSearchResponseTemp
 import LegacyDebriefingChallengesTemplate from "../static/LegacyDebriefingChallengesTemplate.json"
 import DebriefingChallengesTemplate from "../static/DebriefingChallengesTemplate.json"
 import MasteryUnlockablesTemplate from "../static/MasteryUnlockablesTemplate.json"
-import SniperLoadouts from "../static/SniperLoadouts.json"
 import Scpcallunlockables from "../static/Scpcallunlockables.json"
 import DiscordRichAssetsForBricks from "../static/DiscordRichAssetsForBricks.json"
 import EscalationCodenames from "../static/EscalationCodenames.json"
-import scoreoverviewtemplate from "../static/scoreoverviewtemplate.json"
+import ScoreOverviewTemplate from "../static/ScoreOverviewTemplate.json"
 import PeacockGameChangerProperties from "../static/PeacockGameChangerProperties.json"
 import MultiplayerPresets from "../static/MultiplayerPresets.json"
 import LobbySlimTemplate from "../static/LobbySlimTemplate.json"
 import MasteryDataForLocationTemplate from "../static/MasteryDataForLocationTemplate.json"
+import LegacyMasteryLocationTemplate from "../static/LegacyMasteryLocationTemplate.json"
 import DefaultCpdConfig from "../static/DefaultCpdConfig.json"
 import EvergreenGameChangerProperties from "../static/EvergreenGameChangerProperties.json"
+import AreaMap from "../static/AreaMap.json"
+import HitsCategoryElusiveTemplate from "../static/HitsCategoryElusiveTemplate.json"
+import HitsCategoryContractAttackTemplate from "../static/HitsCategoryContractAttackTemplate.json"
+import MissionRewardsTemplate from "../static/MissionRewardsTemplate.json"
+import SniperUnlockables from "../static/SniperUnlockables.json"
+import ScpcLocationsData from "../static/ScpcLocationsData.json"
 import type { GameVersion } from "./types/types"
 import { fastClone } from "./utils"
 
@@ -118,7 +126,7 @@ import { fastClone } from "./utils"
  *
  * @private
  */
-const configs: Record<string, unknown> = {
+const configs = {
     Roadmap,
     StoreData,
     FilterData,
@@ -127,9 +135,9 @@ const configs: Record<string, unknown> = {
     LeaderboardEntriesTemplate,
     GameChangerProperties,
     allunlockables,
-    config: connectionConfigTemplate,
-    onlineconfig,
-    privacypolicy,
+    ServerVersionConfig,
+    OnlineConfig,
+    PrivacyPolicy,
     UserDefault,
     AgencyPickups,
     Entrances,
@@ -175,13 +183,14 @@ const configs: Record<string, unknown> = {
     DebriefingChallengesTemplate,
     LegacyLookupContractByIdTemplate,
     EiderDashboard,
-    PersistentBools,
     FrankensteinHubTemplate,
     H2allunlockables,
     H2DestinationsData,
     H2StoreData,
     H2ContractSearchResponseTemplate,
     H2LocationsData,
+    H2LookupContractByIdTemplate: H2LookupContractTemplate,
+    H2LookupContractFavoriteTemplate: H2LookupContractTemplate,
     H2FilterData,
     H2DashboardTemplate,
     FrankensteinMmSpTemplate,
@@ -190,34 +199,35 @@ const configs: Record<string, unknown> = {
     FrankensteinScoreOverviewTemplate,
     Videos,
     ChallengeLocationTemplate,
+    H2ChallengeLocationTemplate,
+    LegacyChallengeLocationTemplate,
     ReportTemplate,
     ContractSearchPageTemplate,
     ContractSearchPaginateTemplate,
     ContractSearchResponseTemplate,
     MasteryUnlockablesTemplate,
-    SniperLoadouts,
     Scpcallunlockables,
+    ScpcLocationsData,
     DiscordRichAssetsForBricks,
     EscalationCodenames,
-    scoreoverviewtemplate,
+    ScoreOverviewTemplate,
     PeacockGameChangerProperties,
     MultiplayerPresets,
     LobbySlimTemplate,
     MasteryDataForLocationTemplate,
+    LegacyMasteryLocationTemplate,
     DefaultCpdConfig,
     EvergreenGameChangerProperties,
+    AreaMap,
+    HitsCategoryElusiveTemplate,
+    HitsCategoryContractAttackTemplate,
+    MissionRewardsTemplate,
+    SniperUnlockables,
 }
 
 Object.keys(configs).forEach((cfg) => {
     // Parse the string into an object
     configs[cfg] = JSON.parse(configs[cfg])
-
-    const overridePath = join("overrides", `${cfg}.json`)
-
-    if (existsSync(overridePath)) {
-        log(LogLevel.INFO, `Loaded override config for ${cfg}.`)
-        configs[cfg] = JSON.parse(readFileSync(overridePath).toString())
-    }
 })
 
 export { configs }
@@ -231,7 +241,10 @@ export { configs }
  * @returns The config.
  * @throws {Error} If the config file specified doesn't exist.
  */
-export function getConfig<T = unknown>(config: string, clone: boolean): T {
+export function getConfig<T = unknown>(
+    config: keyof typeof configs,
+    clone: boolean,
+): T {
     if (configs.hasOwnProperty.call(configs, config)) {
         if (!clone) {
             return configs[config]

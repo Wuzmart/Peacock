@@ -1,5 +1,29 @@
+/*
+ *     The Peacock Project - a HITMAN server replacement.
+ *     Copyright (C) 2021-2023 The Peacock Project Team
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { Playstyle, ScoringBonus, ScoringHeadline } from "./scoring"
-import { CompletionData, Seconds, Unlockable } from "./types"
+import {
+    ChallengeCompletion,
+    CompletionData,
+    OpportunityStatistics,
+    Seconds,
+    Unlockable,
+} from "./types"
 
 export interface CalculateXpResult {
     completedChallenges: MissionEndChallenge[]
@@ -17,6 +41,19 @@ export interface CalculateScoreResult {
     scoreWithBonus: number
 }
 
+export interface CalculateSniperScoreResult {
+    FinalScore: number
+    BaseScore: number
+    TotalChallengeMultiplier: number
+    BulletsMissed: number
+    BulletsMissedPenalty: number
+    TimeTaken: number
+    TimeBonus: number
+    SilentAssassin: boolean
+    SilentAssassinBonus: number
+    SilentAssassinMultiplier: number
+}
+
 export interface MissionEndChallenge {
     ChallengeId: string
     ChallengeTags: string[]
@@ -29,8 +66,20 @@ export interface MissionEndChallenge {
     Drops: string[]
 }
 
+export interface MissionEndSourceChallenge {
+    ChallengeId: string
+    ChallengeTags: string[]
+    ChallengeName: string
+    ChallengeImageUrl: string
+    ChallengeDescription: string
+    XPGain: number
+    IsGlobal: boolean
+    IsActionReward: boolean
+}
+
 export interface MissionEndDrop {
     Unlockable: Unlockable
+    SourceChallenge?: MissionEndSourceChallenge
 }
 
 export interface MissionEndAchievedMastery {
@@ -73,7 +122,7 @@ export interface MissionEndResponse {
         }
         Challenges: MissionEndChallenge[]
         Drops: MissionEndDrop[]
-        OpportunityRewards: unknown[] //?
+        OpportunityRewards: unknown[] // ?
         UnlockableProgression?: {
             LevelInfo: number[]
             XP: number
@@ -83,18 +132,9 @@ export interface MissionEndResponse {
             Name: string
         }
         CompletionData: CompletionData
-        ChallengeCompletion: {
-            ChallengesCount: number
-            CompletedChallengesCount: number
-        }
-        ContractChallengeCompletion: {
-            ChallengesCount: number
-            CompletedChallengesCount: number
-        }
-        OpportunityStatistics: {
-            Count: number
-            Completed: number
-        }
+        ChallengeCompletion: ChallengeCompletion
+        ContractChallengeCompletion: ChallengeCompletion
+        OpportunityStatistics: OpportunityStatistics
         LocationCompletionPercent: number
     }
     ScoreOverview: {

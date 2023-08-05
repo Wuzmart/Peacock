@@ -20,9 +20,14 @@ import type * as core from "express-serve-static-core"
 
 import type { IContractCreationPayload } from "../statemachines/contractCreation"
 import type { Request } from "express"
-import { ProfileChallengeData, SavedChallenge } from "./challenges"
+import {
+    ChallengeContext,
+    ProfileChallengeData,
+    SavedChallenge,
+} from "./challenges"
 import { SessionGhostModeDetails } from "../multiplayer/multiplayerService"
 import { IContextListener } from "../statemachines/contextListeners"
+import { ManifestScoringModule, ScoringModule } from "./scoring"
 import { Timer } from "@peacockproject/statemachine-parser"
 
 /**
@@ -181,11 +186,12 @@ export type MissionType =
     | "arcade"
     | "vsrace"
     | "evergreen"
+    | "flashback"
 
 /**
  * The data acquired when using the "contract search" functionality.
  */
-export interface contractSearchResult {
+export interface ContractSearchResult {
     Data: {
         Contracts: {
             UserCentricContract: UserCentricContract
@@ -213,6 +219,7 @@ export interface ContractSessionLastKill {
  * Primarily used for scoring, saving, and loading.
  */
 export interface ContractSession {
+    Id: string
     gameVersion: GameVersion
     sessionStart: Date | number
     lastUpdate: Date | number
@@ -258,12 +265,7 @@ export interface ContractSession {
      * @since v5.6.0-dev.1
      */
     challengeContexts?: {
-        [challengeId: string]: {
-            context: unknown
-            state: string
-            timers: Timer[]
-            timesCompleted: number
-        }
+        [challengeId: string]: ChallengeContext
     }
     /**
      * Session Evergreen details.
@@ -275,6 +277,33 @@ export interface ContractSession {
         scoringScreenEndState: string
         failed: boolean
     }
+    /**
+     * Scoring settings, and statemachine settings.
+     * Currently only used for Sniper Challenge missions.
+     *
+     * Settings: Keyed by the type property in modules.
+     * Context: The current context of the scoring statemachine.
+     * Definition: The initial definition of the scoring statemachine.
+     * State: The current state of the scoring statemachine.
+     * Timers: The current timers of the scoring statemachine.
+     *
+     * @since v7.0.0
+     */
+    scoring?: {
+        Settings: {
+            [name: string]: ScoringModule
+        }
+        Context: unknown
+        Definition: unknown
+        State: string
+        Timers: Timer[]
+    }
+    /**
+     * Timestamp of first kill.
+     * Used for calculating Sniper Challenge time bonus.
+     * @since v7.0.0
+     */
+    firstKillTimestamp?: number
 }
 
 /**
@@ -371,12 +400,22 @@ export interface MissionStory {
     Summary: string
     Briefing: string
     Location: string
+    SubLocation: string
     Image: string
 }
 
 export interface PlayerProfileView {
     template: unknown
     data: {
+        SubLocationData: {
+            ParentLocation: Unlockable
+            Location: Unlockable
+            CompletionData: CompletionData
+            ChallengeCategoryCompletion: ChallengeCategoryCompletion[]
+            ChallengeCompletion: ChallengeCompletion
+            OpportunityStatistics: OpportunityStatistics
+            LocationCompletionPercent: number
+        }[]
         PlayerProfileXp: {
             Total: number
             Level: number
@@ -396,9 +435,31 @@ export interface PlayerProfileView {
     }
 }
 
+export interface ChallengeCompletion {
+    ChallengesCount: number
+    CompletedChallengesCount: number
+    CompletionPercent?: number
+}
+
+export interface ChallengeCategoryCompletion extends ChallengeCompletion {
+    Name: string
+}
+
+export interface OpportunityStatistics {
+    Count: number
+    Completed: number
+}
+
 export interface ContractHistory {
     LastPlayedAt?: number
     Completed?: boolean
+    IsEscalation?: boolean
+}
+
+export interface ProgressionData {
+    Xp: number
+    Level: number
+    PreviouslySeenXp: number
 }
 
 export interface UserProfile {
@@ -452,11 +513,16 @@ export interface UserProfile {
                     ActionXp: number
                 }[]
             }
+            /**
+             * If the mastery location has subpackages and not drops, it will
+             * be an object.
+             */
             Locations: {
-                [location: string]: {
-                    Xp: number
-                    Level: number
-                }
+                [location: string]:
+                    | ProgressionData
+                    | {
+                          [subPackageId: string]: ProgressionData
+                      }
             }
         }
         defaultloadout?: {
@@ -478,6 +544,14 @@ export interface UserProfile {
                 MyContracts: string
                 MyPlaylist: string
             }
+            menudata: {
+                difficulty: {
+                    destinations: {
+                        [locationId: string]: "normal" | "pro1"
+                    }
+                }
+                newunlockables: string[]
+            }
         }
         opportunityprogression: {
             [opportunityId: RepositoryId]: boolean
@@ -494,6 +568,10 @@ export interface UserProfile {
     XboxLiveId: string | null
     PSNAccountId: string | null
     PSNOnlineId: string | null
+    /**
+     * @since v7.0.0 user profiles are now versioned.
+     */
+    Version: number
 }
 
 export interface RatingKill {
@@ -523,7 +601,6 @@ export interface NamespaceEntitlementEpic {
  */
 export interface Unlockable {
     Id: string
-    Opportunities?: number
     DisplayNameLocKey: string
     GameAsset: string | null
     Guid: string
@@ -637,6 +714,7 @@ export interface CompletionData {
     Level: number
     MaxLevel: number
     XP: number
+    PreviouslySeenXp: number
     Completion: number
     XpLeft: number
     Id: string
@@ -671,6 +749,7 @@ export interface UserCentricContract {
         CompletionData?: CompletionData
         DlcName: string
         DlcImage: string
+        EscalationCompleted?: boolean
         EscalationCompletedLevels?: number
         EscalationTotalLevels?: number
         InGroup?: string
@@ -849,13 +928,11 @@ export interface MissionManifestMetadata {
     Difficulty?: "pro1" | string
     CharacterSetup?: {
         Mode: "singleplayer" | "multiplayer" | string
-        Characters: [
-            {
-                Name: string
-                Id: string
-                MandatoryLoadout?: string[]
-            },
-        ]
+        Characters: {
+            Name: string
+            Id: string
+            MandatoryLoadout?: string[]
+        }[]
     }[]
     CharacterLoadoutData?: {
         Id: string
@@ -879,6 +956,7 @@ export interface MissionManifestMetadata {
     // Begin escalation-exclusive properties
     InGroup?: string
     NextContractId?: string
+    GroupDefinition?: ContractGroupDefinition
     GroupData?: {
         Level: number
         TotalLevels: number
@@ -896,7 +974,15 @@ export interface MissionManifestMetadata {
     IsEvergreenSafehouse?: boolean
     UseContractProgressionData?: boolean
     CpdId?: string
-    GroupDefinition?: ContractGroupDefinition
+    /**
+     * Custom property used for Elusives (like official's year)
+     * and Escalations (if it's 0, it is a Peacock escalation,
+     * and OriginalSeason will exist for filtering).
+     */
+    Season?: number
+    OriginalSeason?: number
+    // Used for sniper scoring
+    Modules?: ManifestScoringModule[]
 }
 
 export interface GroupObjectiveDisplayOrderItem {
@@ -960,6 +1046,15 @@ export interface MissionManifest {
         noAgencyPickupsActive?: boolean
         noGear?: boolean
         noCarriedWeapon?: boolean
+    }
+    SMF?: {
+        destinations: {
+            addToDestinations: boolean
+            peacockIntegration?: boolean
+            narrativeContext?: "Mission" | "Campaign"
+            placeBefore?: string
+            placeAfter?: string
+        }
     }
 }
 
@@ -1125,7 +1220,10 @@ export interface CompiledChallengeTreeData {
     Completed: boolean
     CompletionData: CompletionData
     Description: string
-    DifficultyLevels?: unknown // more investigation required
+    // A string array of at most one element ("easy", "normal", or "hard").
+    // If empty, then the challenge should appear in sessions on any difficulty.
+    // If not, then it should only appear in sessions on or above the specified difficulty.
+    DifficultyLevels?: string[]
     Displayed?: boolean
     Drops?: Unlockable[]
     HideProgression: boolean
@@ -1379,6 +1477,13 @@ export interface PlayNextGetCampaignsHookReturn {
      * An object containing the campaign's details.
      */
     campaignDetails: PlayNextCampaignDetails
+    /**
+     * An array index for plugins to override play next tiles that Peacock
+     * internally added
+     *
+     * @since v6.3.0
+     */
+    overrideIndex?: number
 }
 
 export type SafehouseCategory = {

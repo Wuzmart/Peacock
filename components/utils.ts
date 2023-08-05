@@ -21,6 +21,7 @@ import type { NextFunction, Response } from "express"
 import type {
     GameVersion,
     MissionManifestObjective,
+    PeacockLocationsData,
     RepositoryId,
     RequestWithJwt,
     ServerVersion,
@@ -31,6 +32,7 @@ import axios, { AxiosError } from "axios"
 import { log, LogLevel } from "./loggingInterop"
 import { writeFileSync } from "fs"
 import { getFlag } from "./flags"
+import { getConfig, getVersionedConfig } from "./configSwizzleManager"
 
 /**
  * True if the server is being run by the launcher, false otherwise.
@@ -52,7 +54,16 @@ export const uuidRegex =
 
 export const contractTypes = ["featured", "usercreated"]
 
+export const versions: GameVersion[] = ["h1", "h2", "h3"]
+
 export const contractCreationTutorialId = "d7e2607c-6916-48e2-9588-976c7d8998bb"
+
+/**
+ * The latest profile version, this should be changed in conjunction with the updating mechanism.
+ *
+ * See docs/USER_PROFILES.md for more.
+ */
+export const LATEST_PROFILE_VERSION = 1
 
 export async function checkForUpdates(): Promise<void> {
     if (getFlag("updateChecking") === false) {
@@ -150,7 +161,7 @@ export function xpRequiredForLevel(level: number): number {
     return Math.max(0, (level - 1) * XP_PER_LEVEL)
 }
 
-//TODO: Determine some mathematical function
+// TODO: Determine some mathematical function
 export const EVERGREEN_LEVEL_INFO: number[] = [
     0, 5000, 10000, 17000, 24000, 31000, 38000, 45000, 52000, 61000, 70000,
     79000, 88000, 97000, 106000, 115000, 124000, 133000, 142000, 154000, 166000,
@@ -182,12 +193,24 @@ export function xpRequiredForEvergreenLevel(level: number): number {
     return EVERGREEN_LEVEL_INFO[level - 1]
 }
 
-//TODO: Determine some mathematical function
+// TODO: Determine some mathematical function
 export const SNIPER_LEVEL_INFO: number[] = [
     0, 50000, 150000, 500000, 1000000, 1700000, 2500000, 3500000, 5000000,
     7000000, 9500000, 12500000, 16000000, 20000000, 25000000, 31000000,
     38000000, 47000000, 58000000, 70000000,
 ]
+
+export function sniperLevelForXp(xp: number): number {
+    for (let i = 1; i < SNIPER_LEVEL_INFO.length; i++) {
+        if (xp >= SNIPER_LEVEL_INFO[i]) {
+            continue
+        }
+
+        return i
+    }
+
+    return 1
+}
 
 /**
  * Get the number of xp needed to reach a level in sniper missions.
@@ -206,6 +229,123 @@ export function clampValue(value: number, min: number, max: number) {
 }
 
 /**
+ * Updates a user profile depending on the current version (if any).
+ * @param profile The userprofile to update
+ * @param gameVersion The game version
+ * @returns The updated user profile
+ */
+function updateUserProfile(
+    profile: UserProfile,
+    gameVersion: GameVersion,
+): void {
+    /**
+     * This switch is structured such that the current profile version will return.
+     * thus stopping the function.
+     *
+     * As the version number is incremented, the previous version should be added
+     * as a case to update it to the newest version.
+     */
+    switch (profile.Version) {
+        case LATEST_PROFILE_VERSION:
+            // This profile updated to the latest version, we're done.
+            return
+        default: {
+            // Check that the profile version is indeed undefined. If it isn't,
+            // we've forgotten to add a version to the switch.
+            if (profile.Version !== undefined) {
+                log(
+                    LogLevel.ERROR,
+                    `Unhandled profile version ${profile.Version}`,
+                )
+                return
+            }
+
+            // Profile has no version, update it to version 1, then re-run
+            // the function to update it to subsequent versions.
+
+            const sniperLocs = {
+                LOCATION_PARENT_AUSTRIA: [
+                    "FIREARMS_SC_HERO_SNIPER_HM",
+                    "FIREARMS_SC_HERO_SNIPER_KNIGHT",
+                    "FIREARMS_SC_HERO_SNIPER_STONE",
+                ],
+                LOCATION_PARENT_SALTY: [
+                    "FIREARMS_SC_SEAGULL_HM",
+                    "FIREARMS_SC_SEAGULL_KNIGHT",
+                    "FIREARMS_SC_SEAGULL_STONE",
+                ],
+                LOCATION_PARENT_CAGED: [
+                    "FIREARMS_SC_FALCON_HM",
+                    "FIREARMS_SC_FALCON_KNIGHT",
+                    "FIREARMS_SC_FALCON_STONE",
+                ],
+            }
+
+            // We need this to ensure all locations are added.
+            const allLocs = Object.keys(
+                getVersionedConfig<PeacockLocationsData>(
+                    "LocationsData",
+                    gameVersion,
+                    false,
+                ).parents,
+            ).map((key) => key.toLocaleLowerCase())
+
+            profile.Extensions.progression.Locations = allLocs.reduce(
+                (obj, key) => {
+                    const newKey = key.toLocaleUpperCase()
+                    const curData =
+                        profile.Extensions.progression.Locations[key]
+
+                    if (gameVersion === "h1") {
+                        // No sniper locations, but we add normal and pro1
+                        obj[newKey] = {
+                            // Data from previous profiles only contains normal and is the default.
+                            normal: {
+                                Xp: curData.Xp ?? 0,
+                                Level: curData.Level ?? 1,
+                                PreviouslySeenXp: curData.PreviouslySeenXp ?? 0,
+                            },
+                            pro1: {
+                                Xp: 0,
+                                Level: 1,
+                                PreviouslySeenXp: 0,
+                            },
+                        }
+                    } else {
+                        // We need to update sniper locations.
+                        obj[newKey] = sniperLocs[newKey]
+                            ? sniperLocs[newKey].reduce((obj, uId) => {
+                                  obj[uId] = {
+                                      Xp: 0,
+                                      Level: 1,
+                                      PreviouslySeenXp: 0,
+                                  }
+
+                                  return obj
+                              }, {})
+                            : {
+                                  Xp: curData.Xp ?? 0,
+                                  Level: curData.Level ?? 1,
+                                  PreviouslySeenXp:
+                                      curData.PreviouslySeenXp ?? 0,
+                              }
+                    }
+
+                    return obj
+                },
+                {},
+            )
+
+            delete profile.Extensions.progression["Unlockables"]
+
+            profile.Version = 1
+
+            return updateUserProfile(profile, gameVersion)
+        }
+    }
+}
+
+/**
  * Returns whether a location is a sniper location. Works for both parent and child locations.
  * @param location The location ID string.
  * @returns A boolean denoting the result.
@@ -218,7 +358,11 @@ export function isSniperLocation(location: string): boolean {
     )
 }
 
-export function castUserProfile(profile: UserProfile): UserProfile {
+export function castUserProfile(
+    profile: UserProfile,
+    gameVersion: GameVersion,
+    path?: string,
+): UserProfile {
     const j = fastClone(profile)
 
     if (!j.Extensions || Object.keys(j.Extensions).length === 0) {
@@ -285,61 +429,108 @@ export function castUserProfile(profile: UserProfile): UserProfile {
         }
     }
 
+    if (j.Extensions?.gamepersistentdata?.PersistentBool) {
+        switch (getFlag("mapDiscoveryState")) {
+            case "REVEALED":
+                {
+                    const areas = Object.keys(getConfig("AreaMap", false))
+
+                    for (const area of areas) {
+                        j.Extensions.gamepersistentdata.PersistentBool[area] =
+                            true
+                    }
+                }
+
+                break
+            case "CLOUDED":
+                j.Extensions.gamepersistentdata.PersistentBool = {
+                    __Full:
+                        j.Extensions.gamepersistentdata.PersistentBool
+                            ?.__Full ?? {},
+                }
+                break
+        }
+    }
+
+    if (j.Version !== LATEST_PROFILE_VERSION) {
+        // This profile is not the latest version. We must update it.
+        log(LogLevel.DEBUG, `Profile is outdated, updating...`)
+        updateUserProfile(j, gameVersion)
+        dirty = true
+    }
+
     if (dirty) {
-        writeFileSync(`userdata/users/${j.Id}.json`, JSON.stringify(j))
+        writeFileSync(path ?? `userdata/users/${j.Id}.json`, JSON.stringify(j))
         log(LogLevel.INFO, "Profile successfully repaired!")
     }
 
     return j
 }
 
-export function getDefaultSuitFor(location: string) {
-    switch (location) {
-        case "LOCATION_PARENT_ICA_FACILITY":
-            return "TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT"
-        case "LOCATION_PARENT_PARIS":
-            return "TOKEN_OUTFIT_PARIS_HERO_PARISSUIT"
-        case "LOCATION_PARENT_COASTALTOWN":
-            return "TOKEN_OUTFIT_SAPIENZA_HERO_SAPIENZASUIT"
-        case "LOCATION_PARENT_MARRAKECH":
-            return "TOKEN_OUTFIT_MARRAKESH_HERO_MARRAKESHSUIT"
-        case "LOCATION_PARENT_BANGKOK":
-            return "TOKEN_OUTFIT_BANGKOK_HERO_BANGKOKSUIT"
-        case "LOCATION_PARENT_COLORADO":
-            return "TOKEN_OUTFIT_COLORADO_HERO_COLORADOSUIT"
-        case "LOCATION_PARENT_HOKKAIDO":
-            return "TOKEN_OUTFIT_HOKKAIDO_HERO_HOKKAIDOSUIT"
-        case "LOCATION_PARENT_NEWZEALAND":
-            return "TOKEN_OUTFIT_NEWZEALAND_HERO_NEWZEALANDSUIT"
-        case "LOCATION_PARENT_MIAMI":
-            return "TOKEN_OUTFIT_MIAMI_HERO_MIAMISUIT"
-        case "LOCATION_PARENT_COLOMBIA":
-            return "TOKEN_OUTFIT_COLOMBIA_HERO_COLOMBIASUIT"
-        case "LOCATION_PARENT_MUMBAI":
-            return "TOKEN_OUTFIT_MUMBAI_HERO_MUMBAISUIT"
-        case "LOCATION_PARENT_NORTHAMERICA":
-            return "TOKEN_OUTFIT_NORTHAMERICA_HERO_NORTHAMERICASUIT"
-        case "LOCATION_PARENT_NORTHSEA":
-            return "TOKEN_OUTFIT_NORTHSEA_HERO_NORTHSEASUIT"
-        case "LOCATION_PARENT_GREEDY":
-            return "TOKEN_OUTFIT_GREEDY_HERO_GREEDYSUIT"
-        case "LOCATION_PARENT_OPULENT":
-            return "TOKEN_OUTFIT_OPULENT_HERO_OPULENTSUIT"
-        case "LOCATION_PARENT_GOLDEN":
-            return "TOKEN_OUTFIT_HERO_GECKO_SUIT"
-        case "LOCATION_PARENT_ANCESTRAL":
-            return "TOKEN_OUTFIT_ANCESTRAL_HERO_ANCESTRALSUIT"
-        case "LOCATION_PARENT_EDGY":
-            return "TOKEN_OUTFIT_EDGY_HERO_EDGYSUIT"
-        case "LOCATION_PARENT_WET":
-            return "TOKEN_OUTFIT_WET_HERO_WETSUIT"
-        case "LOCATION_PARENT_ELEGANT":
-            return "TOKEN_OUTFIT_ELEGANT_HERO_LLAMASUIT"
-        case "LOCATION_PARENT_ROCKY":
-            return "TOKEN_OUTFIT_HERO_DUGONG_SUIT"
-        default:
-            return "TOKEN_OUTFIT_HITMANSUIT"
-    }
+export const defaultSuits = {
+    LOCATION_PARENT_ICA_FACILITY: "TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT",
+    LOCATION_PARENT_PARIS: "TOKEN_OUTFIT_PARIS_HERO_PARISSUIT",
+    LOCATION_PARENT_COASTALTOWN: "TOKEN_OUTFIT_SAPIENZA_HERO_SAPIENZASUIT",
+    LOCATION_COASTALTOWN_MOVIESET:
+        "TOKEN_OUTFIT_SAPIENZA_HERO_SAPIENZASUIT_NOGLASSES",
+    LOCATION_COASTALTOWN_EBOLA:
+        "TOKEN_OUTFIT_SAPIENZA_HERO_SAPIENZASUIT_NOGLASSES",
+    LOCATION_PARENT_MARRAKECH: "TOKEN_OUTFIT_MARRAKESH_HERO_MARRAKESHSUIT",
+    LOCATION_PARENT_BANGKOK: "TOKEN_OUTFIT_BANGKOK_HERO_BANGKOKSUIT",
+    LOCATION_PARENT_COLORADO: "TOKEN_OUTFIT_COLORADO_HERO_COLORADOSUIT",
+    LOCATION_PARENT_HOKKAIDO: "TOKEN_OUTFIT_HOKKAIDO_HERO_HOKKAIDOSUIT",
+    LOCATION_PARENT_NEWZEALAND: "TOKEN_OUTFIT_WET_SUIT",
+    LOCATION_PARENT_MIAMI: "TOKEN_OUTFIT_MIAMI_HERO_MIAMISUIT",
+    LOCATION_PARENT_COLOMBIA: "TOKEN_OUTFIT_COLOMBIA_HERO_COLOMBIASUIT",
+    LOCATION_PARENT_MUMBAI: "TOKEN_OUTFIT_MUMBAI_HERO_MUMBAISUIT",
+    LOCATION_PARENT_NORTHAMERICA:
+        "TOKEN_OUTFIT_NORTHAMERICA_HERO_NORTHAMERICASUIT",
+    LOCATION_PARENT_NORTHSEA: "TOKEN_OUTFIT_NORTHSEA_HERO_NORTHSEASUIT",
+    LOCATION_PARENT_GREEDY: "TOKEN_OUTFIT_GREEDY_HERO_GREEDYSUIT",
+    LOCATION_PARENT_OPULENT: "TOKEN_OUTFIT_OPULENT_HERO_OPULENTSUIT",
+    LOCATION_PARENT_GOLDEN: "TOKEN_OUTFIT_HERO_GECKO_SUIT",
+    LOCATION_PARENT_ANCESTRAL: "TOKEN_OUTFIT_ANCESTRAL_HERO_ANCESTRALSUIT",
+    LOCATION_ANCESTRAL_SMOOTHSNAKE:
+        "TOKEN_OUTFIT_ANCESTRAL_HERO_SMOOTHSNAKESUIT",
+    LOCATION_PARENT_EDGY: "TOKEN_OUTFIT_EDGY_HERO_EDGYSUIT",
+    LOCATION_PARENT_WET: "TOKEN_OUTFIT_WET_HERO_WETSUIT",
+    LOCATION_PARENT_ELEGANT: "TOKEN_OUTFIT_ELEGANT_HERO_LLAMASUIT",
+    LOCATION_PARENT_TRAPPED: "TOKEN_OUTFIT_TRAPPED_WOLVERINE_SUIT",
+    LOCATION_PARENT_ROCKY: "TOKEN_OUTFIT_HERO_DUGONG_SUIT",
+}
+
+/**
+ * Default suits that are attainable via challenges or mastery in this version.
+ * NOTE: Currently this is hardcoded. To allow for flexibility and extensibility, this should be generated in real-time
+ * using the Drops of challenges and masteries. However, that would require looping through all challenges and masteries
+ * for all default suits, which is slow. This is a trade-off.
+ * @param   gameVersion The game version.
+ * @returns  The default suits that are attainable via challenges or mastery.
+ */
+export function attainableDefaults(gameVersion: GameVersion): string[] {
+    return gameVersion === "h1"
+        ? []
+        : gameVersion === "h2"
+        ? ["TOKEN_OUTFIT_WET_SUIT"]
+        : [
+              "TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT",
+              "TOKEN_OUTFIT_WET_SUIT",
+              "TOKEN_OUTFIT_HERO_DUGONG_SUIT",
+          ]
+}
+
+/**
+ * Gets the default suit for a given sub-location and parent location.
+ * Priority is given to the sub-location, then the parent location, then 47's signature suit.
+ * @param subLocation The sub-location.
+ * @returns The default suit for the given sub-location and parent location.
+ */
+export function getDefaultSuitFor(subLocation: Unlockable) {
+    return (
+        defaultSuits[subLocation.Id] ||
+        defaultSuits[subLocation.Properties.ParentLocation] ||
+        "TOKEN_OUTFIT_HITMANSUIT"
+    )
 }
 
 export const nilUuid = "00000000-0000-0000-0000-000000000000"
@@ -360,6 +551,7 @@ export function isObjectiveActive(
             )
         }
     }
+
     return false
 }
 
@@ -396,6 +588,7 @@ export const gameDifficulty = {
      * Casual mode.
      */
     casual: 1,
+    easy: 1,
     /**
      * Professional (normal) mode.
      */
@@ -404,6 +597,7 @@ export const gameDifficulty = {
      * Master mode.
      */
     master: 4,
+    hard: 4,
 } as const
 
 export function difficultyToString(difficulty: number): string {
@@ -474,47 +668,28 @@ export function addDashesToPublicId(publicId: string): string {
  * @returns The new item.
  */
 export function fastClone<T>(item: T): T {
-    // null, undefined values check
-    if (!item) {
-        return item
+    return structuredClone(item)
+}
+
+/**
+ * Returns if the specified repository ID is a suit.
+ *
+ * @param repoId The repository ID.
+ * @returns If the repository ID points to a suit.
+ */
+export function isSuit(repoId: string): boolean {
+    const suitsToTypeMap: Record<string, string> = {}
+
+    const unlockablesFiltered = getConfig<readonly Unlockable[]>(
+        "allunlockables",
+        false,
+    ).filter((unlockable) => unlockable.Type === "disguise")
+
+    for (const u of unlockablesFiltered) {
+        suitsToTypeMap[u.Properties.RepositoryId] = u.Subtype
     }
 
-    const types = [Number, String, Boolean]
-    let result
-
-    // normalizing primitives if someone did new String("aaa"), or new Number("444")
-    for (const type of types) {
-        if (item instanceof type) {
-            result = type(item)
-        }
-    }
-
-    if (typeof result === "undefined") {
-        if (Array.isArray(item)) {
-            result = []
-
-            // Ugly type casting.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const itemAsArray: Array<typeof item> = item as any
-
-            itemAsArray.forEach((child, index) => {
-                result[index] = fastClone(child)
-            })
-        } else if (typeof item === "object") {
-            // this is a literal
-            if (item instanceof Date) {
-                result = new Date(item)
-            } else {
-                // object literal
-                result = {}
-                for (const i in item) {
-                    result[i] = fastClone(item[i])
-                }
-            }
-        } else {
-            result = item
-        }
-    }
-
-    return result
+    return suitsToTypeMap[repoId]
+        ? suitsToTypeMap[repoId] !== "disguise"
+        : false
 }

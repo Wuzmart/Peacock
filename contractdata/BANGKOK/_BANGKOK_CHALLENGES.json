@@ -1,6 +1,7 @@
 {
     "meta": {
-        "Location": "LOCATION_PARENT_BANGKOK"
+        "Location": "LOCATION_PARENT_BANGKOK",
+        "GameVersion": "h3"
     },
     "groups": [
         {
@@ -28,6 +29,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -70,6 +72,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -132,6 +135,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -211,6 +215,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -282,6 +287,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -334,6 +340,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -376,6 +383,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -448,6 +456,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -520,6 +529,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -577,6 +587,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -629,6 +640,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -681,6 +693,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -774,6 +787,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -842,6 +856,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -894,6 +909,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -945,6 +961,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -987,6 +1004,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1064,6 +1082,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1116,6 +1135,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1188,6 +1208,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1240,6 +1261,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1333,6 +1355,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1378,6 +1401,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1519,6 +1543,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1564,6 +1589,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1610,6 +1636,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1684,6 +1711,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1746,6 +1774,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1791,6 +1820,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1836,6 +1866,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1878,6 +1909,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1923,6 +1955,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1968,6 +2001,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2010,6 +2044,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2084,6 +2119,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2129,6 +2165,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2183,6 +2220,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2225,6 +2263,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2267,6 +2306,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2309,6 +2349,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2351,6 +2392,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2393,6 +2435,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2435,6 +2478,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2477,6 +2521,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2519,6 +2564,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2561,6 +2607,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2603,6 +2650,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2645,6 +2693,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2687,6 +2736,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "parentlocation",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2749,6 +2799,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2791,6 +2842,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2881,6 +2933,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2920,6 +2973,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2987,6 +3041,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3103,6 +3158,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3157,6 +3213,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3198,6 +3255,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3250,6 +3308,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3304,6 +3363,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3345,6 +3405,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3399,6 +3460,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3441,6 +3503,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3482,6 +3545,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3524,6 +3588,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3566,6 +3631,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3608,6 +3674,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3646,6 +3713,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3684,6 +3752,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3756,6 +3825,92 @@
                         }
                     },
                     "Tags": ["story", "hard", "feats"]
+                },
+                {
+                    "Id": "6ff3d293-026f-4fba-afd7-fc9a60a464d4",
+                    "Name": "UI_CONTRACT_BLOOD_LILY_GROUP_TITLE",
+                    "ImageName": "images/contracts/escalation/ContractEscalation_Bangkok_BloodLily.jpg",
+                    "Description": "UI_CHALLENGES_ESCLATION_COMPLETE_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$ContractId",
+                                            "de38d516-b4ab-4539-b9b1-89b475f372bb"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["feats", "hard"],
+                    "InclusionData": {
+                        "ContractIds": ["45c831c4-b455-4d21-90f3-6f09b28ee01b"]
+                    }
+                },
+                {
+                    "Id": "a3e32a43-2ef5-4d8c-af6a-25c06c04a347",
+                    "Name": "UI_CONTRACT_HIBISCUS_GROUP_TITLE",
+                    "ImageName": "images/contracts/escalation/ContractEscalation_Bangkok_Hibiscus.jpg",
+                    "Description": "UI_CHALLENGES_ESCLATION_COMPLETE_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$ContractId",
+                                            "2e83eda3-230f-429c-965a-c89e7ada97e3"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["feats", "hard"],
+                    "InclusionData": {
+                        "ContractIds": ["ccbde3e2-67e7-4534-95ec-e9bd7ef65273"]
+                    }
                 }
             ]
         },
@@ -3784,6 +3939,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3826,6 +3982,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3877,6 +4034,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4105,6 +4263,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4155,6 +4314,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4397,6 +4557,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4638,6 +4799,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4880,6 +5042,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4930,6 +5093,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -5158,6 +5322,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -5234,6 +5399,7 @@
                     "ParentLocationId": "LOCATION_PARENT_BANGKOK",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -5455,6 +5621,918 @@
                     "Tags": ["hard", "classic", "sniper", "difficulty_easy"],
                     "InclusionData": {
                         "ContractIds": ["db341d9f-58a4-411d-be57-0bc4ed85646b"]
+                    }
+                }
+            ]
+        },
+        {
+            "Name": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+            "Image": "images/challenges/categories/elusive/tile.jpg",
+            "Icon": "elusive",
+            "CategoryId": "elusive",
+            "Description": "UI_MENU_PAGE_CHALLENGE_CATEGORY_DESCRIPTION_ELUSIVE",
+            "Challenges": [
+                {
+                    "Id": "3151f909-0a87-4e71-81f6-02b52405a8f1",
+                    "Name": "UI_CHALLENGES_ET_BRASSMONKEY_TARGETDOWN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_brassmonkey_M_targetdown.jpg",
+                    "Description": "UI_CHALLENGES_ET_BRASSMONKEY_TARGETDOWN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$Value.RepositoryId",
+                                            "7387e648-ad6b-408d-a0ee-3b3943767e78"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["b0bed170-8652-4188-8b9a-92caf9f97e5b"]
+                    }
+                },
+                {
+                    "Id": "c2275eac-daad-429d-88ef-453eeaab33b6",
+                    "Name": "UI_CHALLENGES_ET_BRASSMONKEY_F_TARGETDOWN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_brassmonkey_F_targetdown.jpg",
+                    "Description": "UI_CHALLENGES_ET_BRASSMONKEY_F_TARGETDOWN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$Value.RepositoryId",
+                                            "978ad630-8d31-4416-8976-8ed1009a4dbd"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["b0bed170-8652-4188-8b9a-92caf9f97e5b"]
+                    }
+                },
+                {
+                    "Id": "2f57c52c-cd9e-4193-9060-aa4c496ce30e",
+                    "Name": "UI_CHALLENGES_ET_BRASSMONKEY_SILENT_ASSASSIN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_brassmonkey_silentassassin.jpg",
+                    "Description": "UI_CHALLENGES_ET_BRASSMONKEY_SILENT_ASSASSIN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {
+                            "Witnesses": [],
+                            "KilledTargets": [],
+                            "RecordingDestroyed": true,
+                            "LastAccidentTime": 0
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    true,
+                                                    "$.RecordingDestroyed"
+                                                ]
+                                            },
+                                            {
+                                                "$all": {
+                                                    "in": "$.Witnesses",
+                                                    "?": {
+                                                        "$any": {
+                                                            "in": "$.KilledTargets",
+                                                            "?": {
+                                                                "$eq": [
+                                                                    "$.#",
+                                                                    "$.##"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                },
+                                "AccidentBodyFound": {
+                                    "$set": ["LastAccidentTime", "$Timestamp"]
+                                },
+                                "Witnesses": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Spotted": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$Value.KillContext",
+                                                            1
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.KillContext",
+                                                        1
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": ["$Value.IsTarget", true]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "CrowdNPC_Died": {
+                                    "Transition": "Failure"
+                                },
+                                "MurderedBodySeen": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.IsWitnessTarget",
+                                                true
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Witnesses",
+                                                "$Value.Witness"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsWitnessTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$.LastAccidentTime",
+                                                            "$Timestamp"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    }
+                                ],
+                                "SecuritySystemRecorder": [
+                                    {
+                                        "Actions": {
+                                            "$set": [
+                                                "RecordingDestroyed",
+                                                false
+                                            ]
+                                        },
+                                        "Condition": {
+                                            "$eq": ["$Value.event", "spotted"]
+                                        }
+                                    },
+                                    {
+                                        "Actions": {
+                                            "$set": ["RecordingDestroyed", true]
+                                        },
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "erased"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "destroyed"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "hard", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["b0bed170-8652-4188-8b9a-92caf9f97e5b"]
+                    }
+                },
+                {
+                    "Id": "9262f862-0960-4ade-8491-eecb522d80e2",
+                    "Name": "UI_CHALLENGES_ET_MARTINI_TARGETDOWN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_martini_targetdown.jpg",
+                    "Description": "UI_CHALLENGES_ET_MARTINI_TARGETDOWN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": ["$Value.IsTarget", true]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["b0b8995c-7b3f-4fa6-91a2-be4bc8edc046"]
+                    }
+                },
+                {
+                    "Id": "1661ba81-60eb-4973-9a2e-e17b62483cfc",
+                    "Name": "UI_CHALLENGES_ET_MARTINI_SILENT_ASSASSIN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_martini_silentassassin.jpg",
+                    "Description": "UI_CHALLENGES_ET_MARTINI_SILENT_ASSASSIN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {
+                            "Witnesses": [],
+                            "KilledTargets": [],
+                            "RecordingDestroyed": true,
+                            "LastAccidentTime": 0
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    true,
+                                                    "$.RecordingDestroyed"
+                                                ]
+                                            },
+                                            {
+                                                "$all": {
+                                                    "in": "$.Witnesses",
+                                                    "?": {
+                                                        "$any": {
+                                                            "in": "$.KilledTargets",
+                                                            "?": {
+                                                                "$eq": [
+                                                                    "$.#",
+                                                                    "$.##"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                },
+                                "AccidentBodyFound": {
+                                    "$set": ["LastAccidentTime", "$Timestamp"]
+                                },
+                                "Witnesses": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Spotted": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$Value.KillContext",
+                                                            1
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.KillContext",
+                                                        1
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": ["$Value.IsTarget", true]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "CrowdNPC_Died": {
+                                    "Transition": "Failure"
+                                },
+                                "MurderedBodySeen": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.IsWitnessTarget",
+                                                true
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Witnesses",
+                                                "$Value.Witness"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsWitnessTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$.LastAccidentTime",
+                                                            "$Timestamp"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    }
+                                ],
+                                "SecuritySystemRecorder": [
+                                    {
+                                        "Actions": {
+                                            "$set": [
+                                                "RecordingDestroyed",
+                                                false
+                                            ]
+                                        },
+                                        "Condition": {
+                                            "$eq": ["$Value.event", "spotted"]
+                                        }
+                                    },
+                                    {
+                                        "Actions": {
+                                            "$set": ["RecordingDestroyed", true]
+                                        },
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "erased"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "destroyed"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "hard", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["b0b8995c-7b3f-4fa6-91a2-be4bc8edc046"]
+                    }
+                },
+                {
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": ["$Value.IsTarget", true]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Description": "UI_CHALLENGES_ET_BLOODYMARY_TARGETDOWN_DESC",
+                    "DifficultyLevels": [],
+                    "Drops": [],
+                    "HideProgression": false,
+                    "Icon": "elusive",
+                    "Id": "9b6e65c2-22cd-4637-8ab1-e48e07acdedc",
+                    "ImageName": "images/challenges/elusive_target/et_bloodymary_targetdown.jpg",
+                    "InclusionData": {
+                        "ContractIds": ["87f8293a-29cd-4cb1-ade7-dd6bb056d38e"]
+                    },
+                    "IsLocked": false,
+                    "IsPlayable": false,
+                    "LocationId": "LOCATION_BANGKOK",
+                    "Name": "UI_CHALLENGES_ET_BLOODYMARY_TARGETDOWN_NAME",
+                    "OrderIndex": 10000,
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "RuntimeType": "Hit",
+                    "Tags": ["story", "medium", "elusive"],
+                    "Type": "contract",
+                    "XpModifier": {}
+                },
+                {
+                    "Id": "265ff025-9e07-4224-b6db-675e44bd62b5",
+                    "Name": "UI_CHALLENGES_ET_BLOODYMARY_SILENT_ASSASSIN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_bloodymary_silentassassin.jpg",
+                    "Description": "UI_CHALLENGES_ET_BLOODYMARY_SILENT_ASSASSIN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "Definition": {
+                        "Context": {
+                            "Witnesses": [],
+                            "KilledTargets": [],
+                            "RecordingDestroyed": true,
+                            "LastAccidentTime": 0
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    true,
+                                                    "$.RecordingDestroyed"
+                                                ]
+                                            },
+                                            {
+                                                "$all": {
+                                                    "in": "$.Witnesses",
+                                                    "?": {
+                                                        "$any": {
+                                                            "in": "$.KilledTargets",
+                                                            "?": {
+                                                                "$eq": [
+                                                                    "$.#",
+                                                                    "$.##"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                },
+                                "AccidentBodyFound": {
+                                    "$set": ["LastAccidentTime", "$Timestamp"]
+                                },
+                                "Witnesses": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Spotted": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$Value.KillContext",
+                                                            1
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.KillContext",
+                                                        1
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": ["$Value.IsTarget", true]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "CrowdNPC_Died": {
+                                    "Transition": "Failure"
+                                },
+                                "MurderedBodySeen": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.IsWitnessTarget",
+                                                true
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Witnesses",
+                                                "$Value.Witness"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsWitnessTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$.LastAccidentTime",
+                                                            "$Timestamp"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    }
+                                ],
+                                "SecuritySystemRecorder": [
+                                    {
+                                        "Actions": {
+                                            "$set": [
+                                                "RecordingDestroyed",
+                                                false
+                                            ]
+                                        },
+                                        "Condition": {
+                                            "$eq": ["$Value.event", "spotted"]
+                                        }
+                                    },
+                                    {
+                                        "Actions": {
+                                            "$set": ["RecordingDestroyed", true]
+                                        },
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "erased"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "destroyed"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Tags": ["story", "hard", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["87f8293a-29cd-4cb1-ade7-dd6bb056d38e"]
+                    }
+                },
+                {
+                    "Id": "12937274-4d85-477d-b20d-fddb408a1015",
+                    "Name": "UI_CHALLENGES_ELUSIVE_TARGET_BANGKOK_NAME",
+                    "ImageName": "images/challenges/profile_challenges/elusive_target_bangkok.jpg",
+                    "Description": "UI_CHALLENGES_ELUSIVE_TARGET_BANGKOK_DESC",
+                    "Rewards": {
+                        "MasteryXP": 0
+                    },
+                    "Drops": ["TOKEN_OUTFIT_HERO_BANGKOKSUITANDGLOVES"],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_BANGKOK",
+                    "ParentLocationId": "LOCATION_PARENT_BANGKOK",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractStart": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$Value.ContractType",
+                                            "elusive"
+                                        ]
+                                    },
+                                    "Transition": "State_ValidContract"
+                                }
+                            },
+                            "State_ValidContract": {
+                                "ContractEnd": [
+                                    {
+                                        "Transition": "Success"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "elusive"],
+                    "InclusionData": {
+                        "ContractTypes": ["elusive"]
                     }
                 }
             ]

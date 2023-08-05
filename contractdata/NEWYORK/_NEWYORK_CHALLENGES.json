@@ -1,6 +1,7 @@
 {
     "meta": {
-        "Location": "LOCATION_PARENT_GREEDY"
+        "Location": "LOCATION_PARENT_GREEDY",
+        "GameVersion": "h3"
     },
     "groups": [
         {
@@ -28,6 +29,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -84,6 +86,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -144,6 +147,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -185,6 +189,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -226,6 +231,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -268,6 +274,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -313,6 +320,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -358,6 +366,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -403,6 +412,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -477,6 +487,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -531,6 +542,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -567,6 +579,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -611,6 +624,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -655,6 +669,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -717,6 +732,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -758,6 +774,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -799,6 +816,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -837,6 +855,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -875,6 +894,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -916,6 +936,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -957,6 +978,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -990,6 +1012,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1079,6 +1102,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1120,6 +1144,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1161,6 +1186,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1194,6 +1220,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1232,6 +1259,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1273,6 +1301,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1320,6 +1349,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1374,6 +1404,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1410,6 +1441,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1464,6 +1496,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1506,6 +1539,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1542,6 +1576,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1596,6 +1631,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1632,6 +1668,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1668,6 +1705,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1704,6 +1742,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1762,6 +1801,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1816,6 +1856,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1852,6 +1893,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1896,6 +1938,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1932,6 +1975,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1986,6 +2030,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2022,6 +2067,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2064,6 +2110,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2106,6 +2153,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2139,6 +2187,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2180,6 +2229,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2200,6 +2250,209 @@
                         }
                     },
                     "Tags": ["story", "easy", "feats"]
+                },
+                {
+                    "Id": "47d697d9-17ff-4629-bfa6-468a70818aa2",
+                    "Name": "UI_PEACOCK_CHALLENGES_GREEDY_SUPPORT_NAME",
+                    "ImageName": "images/challenges/greedy/support.jpg",
+                    "Description": "UI_PEACOCK_CHALLENGES_GREEDY_SUPPORT_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": ["TOKEN_OUTFIT_HERO_GREENSPECIAL_SUIT"],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_GREEDY_RACCOON",
+                    "ParentLocationId": "LOCATION_PARENT_GREEDY",
+                    "Type": "location",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Constants": {
+                            "Goal": 2,
+                            "Target": "596a222e-558b-4a28-a460-b74160e5a12e"
+                        },
+                        "Context": {
+                            "Disposed": [],
+                            "WifiBroken": false
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.RepositoryId",
+                                                        "f03a4c5a-767f-4315-a160-baef4bd1def0"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.RepositoryId",
+                                                        "89c446da-527e-4bd1-b707-6f78949ffd38"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Disposed",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$ge": [
+                                                        "($.Disposed).Count",
+                                                        "$.Goal"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$.WifiBroken",
+                                                        true
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Success"
+                                    }
+                                ],
+                                "BodyHidden": [
+                                    {
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.RepositoryId",
+                                                        "f03a4c5a-767f-4315-a160-baef4bd1def0"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.RepositoryId",
+                                                        "89c446da-527e-4bd1-b707-6f78949ffd38"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Disposed",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$ge": [
+                                                        "($.Disposed).Count",
+                                                        "$.Goal"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$.WifiBroken",
+                                                        true
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Success"
+                                    }
+                                ],
+                                "OpportunityStageEvent": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.OpportunityStageID",
+                                                "$.Target"
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$set": ["WifiBroken", true]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$ge": [
+                                                        "($.Disposed).Count",
+                                                        "$.Goal"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$.WifiBroken",
+                                                        true
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Success"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "easy", "feats", "peacock"]
+                },
+                {
+                    "Id": "40350248-2cd9-4203-aa0b-156e711bb1b3",
+                    "Name": "UI_PEACOCK_HEDGEBUSH",
+                    "ImageName": "images/contracts/escalation/contractescalation_hedgebush.png",
+                    "Description": "UI_CHALLENGES_ESCLATION_COMPLETE_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_GREEDY_RACCOON",
+                    "ParentLocationId": "LOCATION_PARENT_GREEDY",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$ContractId",
+                                            "6968e2a0-b7cf-4cb8-8da5-4871d8c564a5"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["feats", "hard"],
+                    "InclusionData": {
+                        "ContractIds": ["9a461f89-86c5-44e4-998e-f2f66b496aa7"]
+                    }
                 }
             ]
         },
@@ -2228,6 +2481,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2278,6 +2532,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2354,6 +2609,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2404,6 +2660,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2652,6 +2909,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2880,6 +3138,7 @@
                     "ParentLocationId": "LOCATION_PARENT_GREEDY",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {

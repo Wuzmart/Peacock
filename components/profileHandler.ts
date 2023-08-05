@@ -21,6 +21,7 @@ import path from "path"
 import {
     castUserProfile,
     getMaxProfileLevel,
+    LATEST_PROFILE_VERSION,
     nilUuid,
     uuidRegex,
     XP_PER_LEVEL,
@@ -29,7 +30,7 @@ import { json as jsonMiddleware } from "body-parser"
 import { getPlatformEntitlements } from "./platformEntitlements"
 import { contractSessions, newSession } from "./eventHandler"
 import type {
-    CompiledChallengeRuntimeData,
+    CompiledChallengeIngameData,
     ContractSession,
     GameVersion,
     RequestWithJwt,
@@ -62,7 +63,7 @@ const profileRouter = Router()
 
 // /authentication/api/userchannel/
 
-interface FakePlayer {
+export interface FakePlayer {
     id: string
     name: string
     platformId: string
@@ -173,14 +174,8 @@ profileRouter.post(
 
         for (const extension in userdata.Extensions) {
             if (
-                Object.prototype.hasOwnProperty.call(
-                    userdata.Extensions,
-                    extension,
-                ) &&
-                !Object.prototype.hasOwnProperty.call(
-                    req.body.extensions,
-                    extension,
-                )
+                Object.hasOwn(userdata.Extensions, extension) &&
+                !Object.hasOwn(req.body.extensions, extension)
             ) {
                 delete userdata[extension]
             }
@@ -193,14 +188,7 @@ profileRouter.post(
 profileRouter.post(
     "/UnlockableService/GetInventory",
     (req: RequestWithJwt, res) => {
-        const exts = getUserData(
-            req.jwt.unique_name,
-            req.gameVersion,
-        ).Extensions
-
-        res.json(
-            createInventory(req.jwt.unique_name, req.gameVersion, exts.entP),
-        )
+        res.json(createInventory(req.jwt.unique_name, req.gameVersion))
     },
 )
 
@@ -256,11 +244,7 @@ profileRouter.post(
         writeUserData(req.jwt.unique_name, req.gameVersion)
 
         res.json({
-            Inventory: createInventory(
-                req.jwt.unique_name,
-                req.gameVersion,
-                userdata.Extensions.entP,
-            ),
+            Inventory: createInventory(req.jwt.unique_name, req.gameVersion),
             Stats: req.body.localStats,
         })
     },
@@ -298,6 +282,7 @@ export async function resolveProfiles(
                         XboxLiveId: null,
                         PSNAccountId: null,
                         PSNOnlineId: null,
+                        Version: LATEST_PROFILE_VERSION,
                     })
                 }
 
@@ -323,10 +308,12 @@ export async function resolveProfiles(
                         XboxLiveId: null,
                         PSNAccountId: null,
                         PSNOnlineId: null,
+                        Version: LATEST_PROFILE_VERSION,
                     })
                 }
 
                 const fakePlayer = fakePlayerRegistry.getFromId(id)
+
                 if (fakePlayer) {
                     return Promise.resolve({
                         Id: id,
@@ -351,6 +338,7 @@ export async function resolveProfiles(
                         XboxLiveId: null,
                         PSNAccountId: null,
                         PSNOnlineId: null,
+                        Version: LATEST_PROFILE_VERSION,
                     })
                 }
 
@@ -390,7 +378,7 @@ export async function resolveProfiles(
             let userdata: UserProfile = outcome.value
 
             if (!fakeIds.includes(outcome?.value?.Id)) {
-                userdata = castUserProfile(outcome.value)
+                userdata = castUserProfile(outcome.value, gameVersion)
             }
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -481,14 +469,17 @@ profileRouter.post(
     "/ChallengesService/GetActiveChallengesAndProgression",
     jsonMiddleware(),
     (
-        req: RequestWithJwt<Record<string, never>, { contractId: string }>,
+        req: RequestWithJwt<
+            Record<string, never>,
+            { contractId: string; difficultyLevel: number }
+        >,
         res,
     ) => {
         if (!uuidRegex.test(req.body.contractId)) {
             return res.status(404).send("invalid contract")
         }
 
-        const json = controller.resolveContract(req.body.contractId)
+        const json = controller.resolveContract(req.body.contractId, true)
 
         if (!json) {
             log(
@@ -502,19 +493,21 @@ profileRouter.post(
             return res.json([])
         }
 
-        let challenges: CompiledChallengeRuntimeData[] = (
-            getVersionedConfig(
-                "GlobalChallenges",
-                req.gameVersion,
-                true,
-            ) as CompiledChallengeRuntimeData[]
-        ).filter((val) => inclusionDataCheck(val.Challenge.InclusionData, json))
+        let challenges = getVersionedConfig<CompiledChallengeIngameData[]>(
+            "GlobalChallenges",
+            req.gameVersion,
+            true,
+        )
+            .filter((val) => inclusionDataCheck(val.InclusionData, json))
+            .map((item) => ({ Challenge: item, Progression: undefined }))
 
         challenges.push(
             ...Object.values(
                 controller.challengeService.getChallengesForContract(
                     json.Metadata.Id,
                     req.gameVersion,
+                    req.jwt.unique_name,
+                    req.body.difficultyLevel,
                 ),
             )
                 .flat()
@@ -599,10 +592,11 @@ profileRouter.post(
                         req.body.contractId,
                         req.gameVersion,
                         req.jwt.unique_name,
+                        req.body.difficultyLevel,
                     ),
             },
             LevelsDefinition: {
-                //TODO: Add Evergreen LevelInfo here?
+                // TODO: Add Evergreen LevelInfo here?
                 Location: [0],
                 PlayerProfile: {
                     Version: 1,
@@ -619,7 +613,6 @@ profileRouter.post(
     jsonMiddleware(),
     async (req: RequestWithJwt, res) => {
         if (getFlag("loadoutSaving") === "PROFILES") {
-            //#region Save with loadout profiles
             let loadout = loadouts.getLoadoutFor(req.gameVersion)
 
             if (!loadout) {
@@ -629,9 +622,7 @@ profileRouter.post(
             loadout.data[req.body.location] = req.body.loadout
 
             await loadouts.save()
-            //#endregion
         } else {
-            //#region Save with legacy (per-user) system
             const userdata = getUserData(req.jwt.unique_name, req.gameVersion)
 
             if (userdata.Extensions.defaultloadout === undefined) {
@@ -642,7 +633,6 @@ profileRouter.post(
                 req.body.loadout
 
             writeUserData(req.jwt.unique_name, req.gameVersion)
-            //#endregion
         }
 
         res.status(204).end()
@@ -664,10 +654,12 @@ profileRouter.post(
 
             try {
                 await saveSession(save, userData)
+
                 // Successfully saved, so edit user data
                 if (!userData.Extensions.Saves) {
                     userData.Extensions.Saves = {}
                 }
+
                 userData.Extensions.Saves[save.Value.Name] = {
                     Timestamp: save.TimeStamp,
                     ContractSessionId: save.ContractSessionId,
@@ -715,9 +707,11 @@ async function saveSession(
             cause: "non-existent",
         })
     }
+
     if (!userData.Extensions.Saves) {
         userData.Extensions.Saves = {}
     }
+
     if (slot in userData.Extensions.Saves) {
         const delta = save.TimeStamp - userData.Extensions.Saves[slot].Timestamp
 
@@ -766,6 +760,7 @@ profileRouter.post(
     jsonMiddleware(),
     async (req: RequestWithJwt<never, LoadSaveBody>, res) => {
         const userData = getUserData(req.jwt.unique_name, req.gameVersion)
+
         if (
             !req.body.contractSessionId ||
             !req.body.saveToken ||
@@ -824,22 +819,39 @@ async function loadSession(
     sessionData?: ContractSession,
 ): Promise<void> {
     if (!sessionData) {
-        sessionData = await getContractSession(token + "_" + sessionId)
+        try {
+            // First, try the loading the session from the filesystem.
+            sessionData = await getContractSession(token + "_" + sessionId)
+        } catch (e) {
+            // Otherwise, see if we still have this session in memory.
+            // This may be the currently active session, but we need a fallback of some sorts in case a player disconnected.
+            if (contractSessions.has(sessionId)) {
+                sessionData = contractSessions.get(sessionId)
+            } else {
+                // Rethrow the error
+                throw e
+            }
+        }
     }
+
     // Update challenge progression with the user's latest progression data
     for (const cid in sessionData.challengeContexts) {
         // Make sure the ChallengeProgression is available, otherwise loading might fail!
         userData.Extensions.ChallengeProgression[cid] ??= {
+            CurrentState: "Start",
             State: {},
             Completed: false,
             Ticked: false,
         }
 
-        const scope =
-            controller.challengeService.getChallengeById(cid).Definition.Scope
+        const challenge = controller.challengeService.getChallengeById(
+            cid,
+            sessionData.gameVersion,
+        )
+
         if (
             !userData.Extensions.ChallengeProgression[cid].Completed &&
-            (scope === "hit" || scope === "profile")
+            controller.challengeService.needSaveProgression(challenge)
         ) {
             sessionData.challengeContexts[cid].context =
                 userData.Extensions.ChallengeProgression[cid].State

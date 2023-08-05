@@ -21,21 +21,49 @@ export type MissionEndRequestQuery = Partial<{
     masteryUnlockableId?: string
 }>
 
+export type StashpointSlotName =
+    | "gear"
+    | "disguise"
+    | "stashpoint"
+    | "carriedweapon"
+    | "carrieditem"
+    | "concealedweapon"
+    | "concealedweapon2"
+    | string
+
 /**
  * Query that the game sends for the stashpoint route.
  */
 export type StashpointQuery = Partial<{
     contractid: string
+    /**
+     * Can be a number or a UUID.
+     */
     slotid: number | string
-    slotname: "gear" | "disguise" | "stashpoint" | string
+    slotname: StashpointSlotName
     stashpoint?: string
     allowlargeitems: "true" | "false"
     allowcontainers: "true" | "false"
 }>
 
+/**
+ * Query that the game sends for the stashpoint route in H2016.
+ *
+ * @see StashpointQuery
+ */
+export type StashpointQueryH2016 = Omit<
+    StashpointQuery,
+    "allowcontainers" | "slotid"
+>
+
 export type PlanningQuery = Partial<{
     contractid: string
-    resetescalation: string
+    resetescalation: "true" | "false"
+    /**
+     * This is observed to be true for the planning page that shows after the mission end page when finishing a level of an escalation.
+     */
+    forcecurrentcontract: "true" | "false"
+    errorhandling: "true" | "false"
 }>
 
 export type GetForPlay2Body = Partial<{

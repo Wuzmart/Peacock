@@ -16,8 +16,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Timer } from "@peacockproject/statemachine-parser"
 import {
     ContextScopedStorageLocation,
+    GameVersion,
     InclusionData,
     MissionManifestObjective,
 } from "./types"
@@ -38,8 +40,9 @@ export interface SavedChallenge {
     Icon: string
     LocationId: string
     ParentLocationId: string
-    Type: "Hit" | string
-    RuntimeType: "contract" | string
+    // H1 challenges do not have Type
+    Type?: "contract" | string
+    RuntimeType: "Hit" | string
     Xp: number
     XpModifier?: unknown
     DifficultyLevels: string[]
@@ -52,6 +55,10 @@ export interface SavedChallenge {
     }
     Tags: string[]
     InclusionData?: InclusionData
+    // H1 exclusive
+    TypeHeader?: string
+    TypeIcon?: string
+    TypeTitle?: string
 }
 
 export interface SavedChallengeGroup {
@@ -70,12 +77,23 @@ export interface ChallengePackage {
          * The parent location.
          */
         Location: string
+        GameVersion: GameVersion
     }
 }
 
 export type ProfileChallengeData = {
     Ticked: boolean
     Completed: boolean
+    // The state is stored in "CurrentState".
+    CurrentState: string
+    // "State" actually means "Context" here.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     State: any
+}
+
+export type ChallengeContext = {
+    context: unknown
+    state: string
+    timers: Timer[]
+    timesCompleted: number
 }

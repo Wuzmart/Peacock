@@ -45,6 +45,7 @@ import { encodePushMessage } from "./multiplayer/multiplayerUtils"
 import {
     ActorTaggedC2SEvent,
     AmbientChangedC2SEvent,
+    AreaDiscoveredC2SEvent,
     BodyHiddenC2SEvent,
     ContractStartC2SEvent,
     Evergreen_Payout_DataC2SEvent,
@@ -63,6 +64,13 @@ import {
 } from "./types/events"
 import picocolors from "picocolors"
 import { setCpd } from "./evergreen"
+import { getConfig } from "./configSwizzleManager"
+import { resetUserEscalationProgress } from "./contracts/escalations/escalationService"
+import {
+    ManifestScoringDefinition,
+    ManifestScoringModule,
+} from "./types/scoring"
+import { deepmerge } from "deepmerge-ts"
 
 const eventRouter = Router()
 
@@ -141,6 +149,67 @@ export function registerObjectiveListener(
 
     session.objectiveContexts.set(objective.Id, context)
     session.objectiveStates.set(objective.Id, state)
+}
+
+/**
+ * Sets up scoring state machines.
+ *
+ * @param session The contract session.
+ * @param modules Array of scoring modules.
+ */
+export function setupScoring(
+    session: ContractSession,
+    modules: ManifestScoringModule[],
+): void {
+    const scoring = {
+        Settings: {},
+        Context: undefined,
+        Definition: undefined,
+        State: undefined,
+        Timers: [],
+    }
+
+    for (const module of modules) {
+        const name = module.Type.split(".").at(-1)
+
+        if (name === "scoring") {
+            const definition: ManifestScoringDefinition = deepmerge(
+                ...module.ScoringDefinitions,
+            )
+
+            let state = "Start"
+            let context = definition.Context
+
+            const immediate = handleEvent(
+                // @ts-expect-error Type issue
+                definition,
+                context,
+                {},
+                {
+                    eventName: "-",
+                    currentState: state,
+                    timers: scoring.Timers,
+                },
+            )
+
+            if (immediate.state) {
+                state = immediate.state
+            }
+
+            if (immediate.context) {
+                context = immediate.context
+            }
+
+            scoring.Definition = definition
+            scoring.Context = context
+            scoring.State = state
+        } else {
+            scoring.Settings[name] = module
+            delete scoring.Settings[name]["Type"]
+        }
+    }
+
+    session.scoring = scoring
 }
 
 /**
@@ -252,6 +321,7 @@ export function newSession(
     )
 
     contractSessions.set(sessionId, {
+        Id: sessionId,
         gameVersion,
         sessionStart: timestamp,
         lastUpdate: timestamp,
@@ -301,7 +371,6 @@ export function newSession(
 
     controller.challengeService.startContract(
         userId,
-        sessionId,
         contractSessions.get(sessionId)!,
     )
 }
@@ -420,6 +489,7 @@ function contractFailed(
     session.markedTargets.clear()
 
     const json = controller.resolveContract(session.contractId)!
+    const userData = getUserData(session.userId, session.gameVersion)
 
     let realName: string
 
@@ -441,12 +511,8 @@ function contractFailed(
         liveSplitManager.failMission(0)
     }
 
-    const contractData = controller.resolveContract(session.contractId)
-
     // If this is a contract, update the contract in the played list
-    if (contractTypes.includes(contractData.Metadata.Type)) {
-        const userData = getUserData(session.userId, session.gameVersion)
-
+    if (contractTypes.includes(json.Metadata.Type)) {
         const id = session.contractId
 
         if (!userData.Extensions.PeacockPlayedContracts[id]) {
@@ -455,6 +521,34 @@ function contractFailed(
 
         userData.Extensions.PeacockPlayedContracts[id].LastPlayedAt =
             new Date().getTime()
+        writeUserData(session.userId, session.gameVersion)
+    }
+
+    // If this is an arcade contract, reset it
+    arcadeFail: if (json.Metadata.Type === "arcade") {
+        manualExit: if (
+            typeof event.Value === "string" &&
+            event.Value.startsWith("Contract ended manually")
+        ) {
+            if (session.completedObjectives.size === 0) break arcadeFail
+
+            for (const obj of json.Data.Objectives) {
+                if (
+                    session.completedObjectives.has(obj.Id) &&
+                    obj.Category === "primary"
+                ) {
+                    break manualExit
+                }
+            }
+
+            // Any completed objectives are secondary gamechangers, so we don't need to reset the contract
+            break arcadeFail
+        }
+
+        const escalationGroupId = json.Metadata.InGroup ?? json.Metadata.Id
+
+        resetUserEscalationProgress(userData, escalationGroupId)
+
         writeUserData(session.userId, session.gameVersion)
     }
 
@@ -573,11 +667,29 @@ function saveEvents(
             }
         }
 
-        controller.challengeService.onContractEvent(
-            event,
-            event.ContractSessionId,
-            session,
-        )
+        if (session.scoring) {
+            const scoringContext = session.scoring.Context
+            const scoringState = session.scoring.State
+
+            const val = handleEvent(
+                session.scoring.Definition as never,
+                scoringContext,
+                event.Value,
+                {
+                    eventName: event.Name,
+                    timestamp: event.Timestamp,
+                    currentState: scoringState,
+                    timers: session.scoring.Timers,
+                },
+            )
+
+            if (val.context) {
+                session.scoring.Context = val.context
+                session.scoring.State = val.state
+            }
+        }
+
+        controller.challengeService.onContractEvent(event, session)
 
         if (event.Name.startsWith("ScoringScreenEndState_")) {
             session.evergreen.scoringScreenEndState = event.Name
@@ -599,7 +711,7 @@ function saveEvents(
         if (
             !canGetAfterTimerOver.includes(event.Name) &&
             session.timerEnd !== 0 &&
-            event.Timestamp > session.timerEnd
+            event.Timestamp > (session.timerEnd as number)
         ) {
             // Do not handle events that occur after exiting the level
             response.push(process.hrtime.bigint().toString())
@@ -622,6 +734,10 @@ function saveEvents(
                 break
             case "Kill": {
                 const killValue = (event as KillC2SEvent).Value
+
+                if (session.firstKillTimestamp === undefined) {
+                    session.firstKillTimestamp = event.Timestamp
+                }
 
                 if (session.lastKill.timestamp === event.Timestamp) {
                     session.lastKill.repositoryIds?.push(killValue.RepositoryId)
@@ -665,6 +781,7 @@ function saveEvents(
                 } else {
                     session.npcKills.add(killValue.RepositoryId)
                 }
+
                 break
             }
             case "CrowdNPC_Died":
@@ -684,6 +801,7 @@ function saveEvents(
                 if (req.gameVersion === "h1") {
                     session.legacyHasBodyBeenFound = true
                 }
+
                 break
             case "Disguise":
                 log(LogLevel.DEBUG, `Now disguised: ${event.Value as string}`)
@@ -712,14 +830,17 @@ function saveEvents(
                 for (const actor of (event as SpottedC2SEvent).Value) {
                     session.spottedBy.add(actor)
                 }
+
                 break
             case "Witnesses":
                 for (const actor of (event as WitnessesC2SEvent).Value) {
                     session.witnesses.add(actor)
                 }
+
                 break
             case "SecuritySystemRecorder": {
                 const eventValue = (<SecuritySystemRecorderC2SEvent>event).Value
+
                 if (
                     eventValue.event === "spotted" &&
                     session.recording !== PeacockCameraStatus.Erased
@@ -731,6 +852,7 @@ function saveEvents(
                 ) {
                     session.recording = PeacockCameraStatus.Erased
                 }
+
                 break
             }
             case "IntroCutEnd":
@@ -741,6 +863,7 @@ function saveEvents(
                         `Mission started at: ${session.timerStart}`,
                     )
                 }
+
                 break
             case "exit_gate":
                 session.timerEnd = event.Timestamp
@@ -751,6 +874,7 @@ function saveEvents(
                     session.timerEnd = event.Timestamp
                     log(LogLevel.DEBUG, `Mission ended at: ${session.timerEnd}`)
                 }
+
                 break
             case "ObjectiveCompleted":
                 session.completedObjectives.add(
@@ -768,12 +892,14 @@ function saveEvents(
                     session.bodiesFoundBy.add(
                         (<MurderedBodySeenC2SEvent>event).Value.Witness,
                     )
+
                     if (event.Timestamp === session.lastKill.timestamp) {
                         session.killsNoticedBy.add(
                             (<MurderedBodySeenC2SEvent>event).Value.Witness,
                         )
                     }
                 }
+
                 break
             case "ActorTagged": {
                 const val = (<ActorTaggedC2SEvent>event).Value
@@ -783,6 +909,7 @@ function saveEvents(
                 } else if (val.Tagged) {
                     session.markedTargets.add(val.RepositoryId)
                 }
+
                 break
             }
             case "StartingSuit":
@@ -795,12 +922,55 @@ function saveEvents(
             case "OpportunityEvents": {
                 const val = (<OpportunityEventsC2SEvent>event).Value
                 const opportunities = userData.Extensions.opportunityprogression
+
                 if (val.Event === "Completed") {
                     opportunities[val.RepositoryId] = true
                 }
+
                 writeUserData(req.jwt.unique_name, req.gameVersion)
                 break
             }
+            case "AreaDiscovered":
+                // This might be an evergreen session,
+                // so we need to manually call challengeOnEvent for the area
+                // discovery challenge because onContractEvent won't do it for us
+
+                if (session.evergreen) {
+                    const areaId = (<AreaDiscoveredC2SEvent>event).Value
+                        .RepositoryId
+
+                    const challengeId = getConfig("AreaMap", false)[areaId]
+                    const progress = userData.Extensions.ChallengeProgression
+
+                    log(LogLevel.DEBUG, `Area discovered: ${areaId}`)
+
+                    // Nullability checks
+                    progress[challengeId] ??= {
+                        CurrentState: "Start",
+                        Ticked: false,
+                        Completed: false,
+                        State: {
+                            AreaIDs: [],
+                        },
+                    }
+                    progress[challengeId].State ??= { AreaIDs: [] }
+                    progress[challengeId].State.AreaIDs ??= []
+
+                    controller.challengeService.challengeOnEvent(
+                        event,
+                        session,
+                        challengeId,
+                        userData,
+                        {
+                            context: progress[challengeId].State,
+                            state: "Start",
+                            timers: [],
+                            timesCompleted: 0,
+                        },
+                    )
+                }
+
+                break
             // Evergreen
             case "CpdSet":
                 setCpd(
@@ -818,6 +988,7 @@ function saveEvents(
                 if (session.evergreen) {
                     session.evergreen.failed = true
                 }
+
                 break
             // Sinkhole events we don't care about
             case "ItemPickedUp":

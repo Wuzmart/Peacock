@@ -17,6 +17,7 @@
  */
 
 import type {
+    ChallengeCompletion,
     ChallengeProgressionData,
     ChallengeTreeWaterfallState,
     ClientToServerEvent,
@@ -36,7 +37,6 @@ import { controller, Controller } from "../controller"
 import {
     generateCompletionData,
     generateUserCentric,
-    getSubLocationByName,
     getSubLocationFromContract,
 } from "../contracts/dataGen"
 import { log, LogLevel } from "../loggingInterop"
@@ -48,18 +48,8 @@ import {
     handleEvent,
     HandleEventOptions,
 } from "@peacockproject/statemachine-parser"
-import { SavedChallengeGroup } from "../types/challenges"
-import {
-    clampValue,
-    DEFAULT_MASTERY_MAXLEVEL,
-    evergreenLevelForXp,
-    fastClone,
-    getMaxProfileLevel,
-    levelForXp,
-    xpRequiredForEvergreenLevel,
-    xpRequiredForLevel,
-    isSniperLocation,
-} from "../utils"
+import { ChallengeContext, SavedChallengeGroup } from "../types/challenges"
+import { fastClone, isSniperLocation } from "../utils"
 import {
     ChallengeFilterOptions,
     ChallengeFilterType,
@@ -70,6 +60,9 @@ import {
 import assert from "assert"
 import { getVersionedConfig } from "../configSwizzleManager"
 import { SyncHook } from "../hooksImpl"
+import { getUserEscalationProgress } from "../contracts/escalations/escalationService"
+
+import { getUnlockableById } from "../inventory"
 
 type ChallengeDefinitionLike = {
     Context?: Record<string, unknown>
@@ -90,19 +83,61 @@ type GroupIndexedChallengeLists = {
  * A base class providing challenge registration support.
  */
 export abstract class ChallengeRegistry {
-    protected challenges: Map<string, RegistryChallenge> = new Map()
-
-    /** A map of parentLocationIds to maps of groupIds to SavedChallengeGroup objects for this group of this parent location. */
-    protected groups: Map<string, Map<string, SavedChallengeGroup>> = new Map()
-
-    /** A map of parentLocationIds to maps of groupIds to sets of challenge Ids in this group of this parent location. */
-
-    protected groupContents: Map<string, Map<string, Set<string>>> = new Map()
     /**
-     * A map of a challenge ID to a list of challenge IDs that it depends on.
+     * @Key1 Game version.
+     * @Key2 The challenge Id.
+     * @value A `RegistryChallenge` object.
      */
-    protected readonly _dependencyTree: Map<string, readonly string[]> =
-        new Map()
+    protected challenges: Map<GameVersion, Map<string, RegistryChallenge>> =
+        new Map([
+            ["h1", new Map()],
+            ["h2", new Map()],
+            ["h3", new Map()],
+        ])
+
+    /**
+     * @Key1 Game version.
+     * @Key2 The parent location Id.
+     * @Key3 The group Id.
+     * @Value A `SavedChallengeGroup` object.
+     */
+    protected groups: Map<
+        GameVersion,
+        Map<string, Map<string, SavedChallengeGroup>>
+    > = new Map([
+        ["h1", new Map()],
+        ["h2", new Map()],
+        ["h3", new Map()],
+    ])
+
+    /**
+     * @Key1 Game version.
+     * @Key2 The parent location Id.
+     * @Key3 The group Id.
+     * @Value A `Set` of challenge Ids.
+     */
+    protected groupContents: Map<
+        GameVersion,
+        Map<string, Map<string, Set<string>>>
+    > = new Map([
+        ["h1", new Map()],
+        ["h2", new Map()],
+        ["h3", new Map()],
+    ])
+
+    /**
+     * @Key1 Game version.
+     * @Key2 The challenge Id.
+     * @Value An `array` of challenge Ids that Key2 depends on.
+     */
+    protected readonly _dependencyTree: Map<
+        GameVersion,
+        Map<string, readonly string[]>
+    > = new Map([
+        ["h1", new Map()],
+        ["h2", new Map()],
+        ["h3", new Map()],
+    ])
 
     protected constructor(protected readonly controller: Controller) {}
 
@@ -110,15 +145,21 @@ export abstract class ChallengeRegistry {
         challenge: RegistryChallenge,
         groupId: string,
         location: string,
+        gameVersion: GameVersion,
     ): void {
-        challenge.inGroup = groupId
-        this.challenges.set(challenge.Id, challenge)
-
-        if (!this.groupContents.has(location)) {
-            this.groupContents.set(location, new Map())
+        if (!this.groupContents.has(gameVersion)) {
+            return
         }
 
-        const locationMap = this.groupContents.get(location)!
+        const gameChallenges = this.groupContents.get(gameVersion)
+        challenge.inGroup = groupId
+        this.challenges.get(gameVersion)?.set(challenge.Id, challenge)
+
+        if (!gameChallenges.has(location)) {
+            gameChallenges.set(location, new Map())
+        }
+
+        const locationMap = gameChallenges.get(location)!
 
         if (!locationMap.has(groupId)) {
             locationMap.set(groupId, new Set())
@@ -127,68 +168,185 @@ export abstract class ChallengeRegistry {
         const set = locationMap.get(groupId)!
         set.add(challenge.Id)
 
-        this.checkHeuristics(challenge)
+        this.checkHeuristics(challenge, gameVersion)
     }
 
-    registerGroup(group: SavedChallengeGroup, location: string): void {
-        if (!this.groups.has(location)) {
-            this.groups.set(location, new Map())
+    registerGroup(
+        group: SavedChallengeGroup,
+        location: string,
+        gameVersion: GameVersion,
+    ): void {
+        if (!this.groups.has(gameVersion)) {
+            return
         }
-        this.groups.get(location).set(group.CategoryId, group)
+
+        const gameGroups = this.groups.get(gameVersion)
+
+        if (!gameGroups.has(location)) {
+            gameGroups.set(location, new Map())
+        }
+
+        gameGroups.get(location).set(group.CategoryId, group)
     }
 
-    getChallengeById(challengeId: string): RegistryChallenge | undefined {
-        return this.challenges.get(challengeId)
+    getChallengeById(
+        challengeId: string,
+        gameVersion: GameVersion,
+    ): RegistryChallenge | undefined {
+        return this.challenges.get(gameVersion)?.get(challengeId)
+    }
+
+    /**
+     * Returns a list of all challenges unlockables
+     *
+     * @todo This is bad, untyped, and undocumented. Fix it.
+     */
+    getChallengesUnlockables(gameVersion: GameVersion) {
+        return [...this.challenges.get(gameVersion).values()].reduce(
+            (acc, challenge) => {
+                if (challenge?.Drops?.length) {
+                    challenge.Drops.forEach(
+                        (dropId) => (acc[dropId] = challenge.Id),
+                    )
+                }
+
+                return acc
+            },
+            {},
+        )
     }
 
     /**
      * Gets a challenge group by its parent location and group ID.
      * @param groupId The group ID of the challenge group.
      * @param location The parent location for this challenge group.
+     * @param gameVersion The current game version.
      * @returns A `SavedChallengeGroup` if such a group exists, or `undefined` if not.
      */
     getGroupByIdLoc(
         groupId: string,
         location: string,
+        gameVersion: GameVersion,
     ): SavedChallengeGroup | undefined {
+        if (!this.groups.has(gameVersion)) {
+            return undefined
+        }
+
+        const gameGroups = this.groups.get(gameVersion)
+
+        if (groupId === "feats" && gameVersion !== "h3") {
+            return mergeSavedChallengeGroups(
+                gameGroups.get(location)?.get(groupId),
+                gameGroups.get("GLOBAL_ESCALATION_CHALLENGES")?.get(groupId),
+            )
+        }
+
+        if (groupId?.includes("featured")) {
+            return gameGroups.get("GLOBAL_FEATURED_CHALLENGES")?.get(groupId)
+        }
+
+        if (groupId?.includes("arcade")) {
+            return gameGroups.get("GLOBAL_ARCADE_CHALLENGES")?.get(groupId)
+        }
+
+        if (groupId?.includes("escalation")) {
+            return gameGroups.get("GLOBAL_ESCALATION_CHALLENGES")?.get(groupId)
+        }
+
         // Included by default. Filtered later.
         if (groupId === "classic" && location !== "GLOBAL_CLASSIC_CHALLENGES") {
             return mergeSavedChallengeGroups(
-                this.groups.get(location)?.get(groupId),
-                this.groups.get("GLOBAL_CLASSIC_CHALLENGES")?.get(groupId),
+                gameGroups.get(location)?.get(groupId),
+                gameGroups.get("GLOBAL_CLASSIC_CHALLENGES")?.get(groupId),
             )
         }
-        return this.groups.get(location)?.get(groupId)
+
+        if (
+            groupId === "elusive" &&
+            location !== "GLOBAL_ELUSIVES_CHALLENGES"
+        ) {
+            return mergeSavedChallengeGroups(
+                gameGroups.get(location)?.get(groupId),
+                gameGroups.get("GLOBAL_ELUSIVES_CHALLENGES")?.get(groupId),
+            )
+        }
+
+        return gameGroups.get(location)?.get(groupId)
     }
 
     public getGroupContentByIdLoc(
         groupId: string,
         location: string,
+        gameVersion: GameVersion,
     ): Set<string> | undefined {
-        // Included by default. Filtered later.
-        if (groupId === "classic" && location !== "GLOBAL_CLASSIC_CHALLENGES") {
+        if (!this.groupContents.has(gameVersion)) {
+            return undefined
+        }
+
+        const gameChalGC = this.groupContents.get(gameVersion)
+
+        if (groupId === "feats" && gameVersion !== "h3") {
             return new Set([
-                ...(this.groupContents.get(location)?.get(groupId) ?? []),
-                ...(this.groupContents
-                    .get("GLOBAL_CLASSIC_CHALLENGES")
+                ...(gameChalGC.get(location)?.get(groupId) ?? []),
+                ...(gameChalGC
+                    .get("GLOBAL_ESCALATION_CHALLENGES")
                     ?.get(groupId) ?? []),
             ])
         }
-        return this.groupContents.get(location)?.get(groupId)
+
+        if (groupId?.includes("featured")) {
+            return gameChalGC.get("GLOBAL_FEATURED_CHALLENGES")?.get(groupId)
+        }
+
+        if (groupId?.includes("arcade")) {
+            return gameChalGC.get("GLOBAL_ARCADE_CHALLENGES")?.get(groupId)
+        }
+
+        if (groupId?.includes("escalation")) {
+            return gameChalGC.get("GLOBAL_ESCALATION_CHALLENGES")?.get(groupId)
+        }
+
+        // Included by default. Filtered later.
+        if (groupId === "classic" && location !== "GLOBAL_CLASSIC_CHALLENGES") {
+            return new Set([
+                ...(gameChalGC.get(location)?.get(groupId) ?? []),
+                ...(gameChalGC.get("GLOBAL_CLASSIC_CHALLENGES")?.get(groupId) ??
+                    []),
+            ])
+        }
+
+        if (
+            groupId === "elusive" &&
+            location !== "GLOBAL_ELUSIVES_CHALLENGES"
+        ) {
+            return new Set([
+                ...(gameChalGC.get(location)?.get(groupId) ?? []),
+                ...(gameChalGC
+                    .get("GLOBAL_ELUSIVES_CHALLENGES")
+                    ?.get(groupId) ?? []),
+            ])
+        }
+
+        return gameChalGC.get(location)?.get(groupId)
     }
 
-    getDependenciesForChallenge(challengeId: string): readonly string[] {
-        return this._dependencyTree.get(challengeId) || []
+    getDependenciesForChallenge(
+        challengeId: string,
+        gameVersion: GameVersion,
+    ): readonly string[] {
+        return this._dependencyTree.get(gameVersion)?.get(challengeId) || []
     }
 
-    protected checkHeuristics(challenge: RegistryChallenge): void {
+    protected checkHeuristics(
+        challenge: RegistryChallenge,
+        gameVersion: GameVersion,
+    ): void {
         const ctxListeners = ChallengeRegistry._parseContextListeners(challenge)
 
         if (ctxListeners.challengeTreeIds.length > 0) {
-            this._dependencyTree.set(
-                challenge.Id,
-                ctxListeners.challengeTreeIds,
-            )
+            this._dependencyTree
+                .get(gameVersion)
+                ?.set(challenge.Id, ctxListeners.challengeTreeIds)
         }
     }
 
@@ -196,15 +354,17 @@ export abstract class ChallengeRegistry {
      * Parse a challenge's context listeners into the format used internally.
      *
      * @param challenge The challenge.
+     * @param Context The current context of the challenge.
      * @returns The context listener details.
      */
     protected static _parseContextListeners(
         challenge: RegistryChallenge,
+        Context?: Record<string, unknown>,
     ): ParsedContextListenerInfo {
         return parseContextListeners(
             challenge.Definition?.ContextListeners || {},
             {
-                ...(challenge.Definition?.Context || {}),
+                ...(Context || challenge.Definition?.Context || {}),
                 ...(challenge.Definition?.Constants || {}),
             },
         )
@@ -229,6 +389,19 @@ export class ChallengeService extends ChallengeRegistry {
         this.hooks = {
             onChallengeCompleted: new SyncHook(),
         }
+    }
+
+    /**
+     * Check if the challenge needs to be saved in the user's progression data
+     * i.e. challenges with scopes being "profile" or "hit".
+     * @param challenge The challenge.
+     * @returns   Whether the challenge needs to be saved in the user's progression data.
+     */
+    needSaveProgression(challenge: RegistryChallenge): boolean {
+        return (
+            challenge.Definition.Scope === "profile" ||
+            challenge.Definition.Scope === "hit"
+        )
     }
 
     /**
@@ -276,7 +449,7 @@ export class ChallengeService extends ChallengeRegistry {
     ): ChallengeProgressionData {
         const userData = getUserData(userId, gameVersion)
 
-        const challenge = this.getChallengeById(challengeId)
+        const challenge = this.getChallengeById(challengeId, gameVersion)
 
         userData.Extensions.ChallengeProgression ??= {}
 
@@ -288,21 +461,22 @@ export class ChallengeService extends ChallengeRegistry {
             data[challengeId].State = {
                 CurrentState: "Success",
             }
+            data[challengeId].CurrentState = "Success"
         }
-
-        // the default context, used if the user has no progression for this
-        // challenge
-        const initialContext =
-            (<ChallengeDefinitionLike>challenge?.Definition)?.Context || {}
 
         // apply default context if no progression exists
         data[challengeId] ??= {
             Ticked: false,
             Completed: false,
-            State: initialContext,
+            CurrentState: "Start",
+            State:
+                (<ChallengeDefinitionLike>challenge?.Definition)?.Context || {},
         }
 
-        const dependencies = this.getDependenciesForChallenge(challengeId)
+        const dependencies = this.getDependenciesForChallenge(
+            challengeId,
+            gameVersion,
+        )
 
         if (dependencies.length > 0) {
             data[challengeId].State.CompletedChallenges = dependencies.filter(
@@ -322,26 +496,36 @@ export class ChallengeService extends ChallengeRegistry {
     }
 
     /**
+     * This is a helper function for @see getGroupedChallengeLists. It is not expected to be used elsewhere.
+     *
      * Filter all challenges in a parent location using a given filter, sort them into groups,
-     * and return them as a `GroupIndexedChallengeLists`.
+     * and write them into the `challenges` array provided.
      *
      * @param filter The filter to use.
      * @param location The parent location whose challenges to get.
-     * @returns A GroupIndexedChallengeLists containing the resulting challenge groups.
+     * @param challenges The array to write results to.
+     * @param gameVersion The game's version.
      */
-    getGroupedChallengeLists(
+    getGroupedChallengesByLoc(
         filter: ChallengeFilterOptions,
         location: string,
-    ): GroupIndexedChallengeLists {
-        let challenges: [string, RegistryChallenge[]][] = []
+        challenges: [string, RegistryChallenge[]][],
+        gameVersion: GameVersion,
+    ) {
+        const groups = this.groups.get(gameVersion).get(location)?.keys() ?? []
 
-        for (const groupId of this.groups.get(location).keys()) {
+        for (const groupId of groups) {
             // if this is the global group, skip it.
             if (groupId === "global") {
                 continue
             }
 
-            const groupContents = this.getGroupContentByIdLoc(groupId, location)
+            const groupContents = this.getGroupContentByIdLoc(
+                groupId,
+                location,
+                gameVersion,
+            )
+
             if (groupContents) {
                 let groupChallenges: RegistryChallenge[] | string[] = [
                     ...groupContents,
@@ -349,7 +533,10 @@ export class ChallengeService extends ChallengeRegistry {
 
                 groupChallenges = groupChallenges
                     .map((challengeId) => {
-                        const challenge = this.getChallengeById(challengeId)
+                        const challenge = this.getChallengeById(
+                            challengeId,
+                            gameVersion,
+                        )
 
                         // early return if the challenge is falsy
                         if (!challenge) {
@@ -365,6 +552,60 @@ export class ChallengeService extends ChallengeRegistry {
                 challenges.push([groupId, [...groupChallenges]])
             }
         }
+    }
+
+    /**
+     * Filter all challenges in a parent location using a given filter, sort them into groups,
+     * and return them as a `GroupIndexedChallengeLists`.
+     *
+     * @param filter The filter to use.
+     * @param location The parent location whose challenges to get.
+     * @param gameVersion The active game version.
+     * @returns A GroupIndexedChallengeLists containing the resulting challenge groups.
+     */
+    getGroupedChallengeLists(
+        filter: ChallengeFilterOptions,
+        location: string,
+        gameVersion: GameVersion,
+    ): GroupIndexedChallengeLists {
+        let challenges: [string, RegistryChallenge[]][] = []
+
+        if (!this.groups.has(gameVersion)) {
+            return {}
+        }
+
+        this.getGroupedChallengesByLoc(
+            filter,
+            location,
+            challenges,
+            gameVersion,
+        )
+
+        if (filter.type === ChallengeFilterType.Contract && filter.isFeatured) {
+            this.getGroupedChallengesByLoc(
+                filter,
+                "GLOBAL_FEATURED_CHALLENGES",
+                challenges,
+                gameVersion,
+            )
+        }
+
+        this.getGroupedChallengesByLoc(
+            filter,
+            "GLOBAL_ARCADE_CHALLENGES",
+            challenges,
+            gameVersion,
+        )
+
+        // H2 & H1 have the escalation challenges in "feats"
+        if (gameVersion === "h3") {
+            this.getGroupedChallengesByLoc(
+                filter,
+                "GLOBAL_ESCALATION_CHALLENGES",
+                challenges,
+                gameVersion,
+            )
+        }
 
         // remove empty groups
         challenges = challenges.filter(
@@ -377,25 +618,49 @@ export class ChallengeService extends ChallengeRegistry {
     getChallengesForContract(
         contractId: string,
         gameVersion: GameVersion,
+        userId: string,
+        difficulty = 4,
     ): GroupIndexedChallengeLists {
-        const contract = this.controller.resolveContract(contractId)
+        const userData = getUserData(userId, gameVersion)
+        const contract = this.controller.resolveContract(contractId, true)
+
+        const level =
+            contract.Metadata.Type === "arcade" &&
+            contract.Metadata.Id === contractId
+                ? // contractData, being a group contract, has the same Id as the input id parameter.
+                  // This means that we are requesting the challenges for the next level of the group
+                  this.controller.resolveContract(
+                      contract.Metadata.GroupDefinition.Order[
+                          getUserEscalationProgress(userData, contractId) - 1
+                      ],
+                      false,
+                  )
+                : this.controller.resolveContract(contractId, false)
 
         assert.ok(contract)
 
-        const contractParentLocation = getSubLocationFromContract(
-            contract,
+        const levelParentLocation = getSubLocationFromContract(
+            level,
             gameVersion,
         )?.Properties.ParentLocation
 
-        assert.ok(contractParentLocation)
+        assert.ok(levelParentLocation)
 
         return this.getGroupedChallengeLists(
             {
                 type: ChallengeFilterType.Contract,
                 contractId: contractId,
-                locationId: contract.Metadata.Location,
+                locationId:
+                    contract.Metadata.Id ===
+                        "aee6a16f-6525-4d63-a37f-225e293c6118" &&
+                    gameVersion !== "h1"
+                        ? "LOCATION_ICA_FACILITY_SHIP"
+                        : level.Metadata.Location,
+                isFeatured: contract.Metadata.Type === "featured",
+                difficulty,
             },
-            contractParentLocation,
+            levelParentLocation,
+            gameVersion,
         )
     }
 
@@ -409,12 +674,15 @@ export class ChallengeService extends ChallengeRegistry {
             true,
         )
         const parent = locations.children[child].Properties.ParentLocation
-        const location = locations.children[child]
-        assert.ok(location)
 
         let contracts = isSniperLocation(child)
             ? this.controller.missionsInLocations.sniper[child]
-            : this.controller.missionsInLocations[child]
+            : (this.controller.missionsInLocations[child] ?? [])
+                  .concat(
+                      this.controller.missionsInLocations.escalations[child],
+                  )
+                  .concat(this.controller.missionsInLocations.arcade[child])
+
         if (!contracts) {
             contracts = []
         }
@@ -426,24 +694,23 @@ export class ChallengeService extends ChallengeRegistry {
                 locationId: child,
             },
             parent,
+            gameVersion,
         )
     }
 
-    startContract(
-        userId: string,
-        sessionId: string,
-        session: ContractSession,
-    ): void {
+    startContract(userId: string, session: ContractSession): void {
         // we know we will have challenge contexts because this session is
         // brand new.
         const { gameVersion, contractId, challengeContexts } = session
 
+        const contractJson = this.controller.resolveContract(contractId, true)
+
         const challengeGroups = this.getChallengesForContract(
             contractId,
             gameVersion,
+            session.userId,
+            session.difficulty,
         )
-
-        const contractJson = this.controller.resolveContract(contractId)
 
         if (contractJson.Metadata.Type === "evergreen") {
             session.evergreen = {
@@ -453,10 +720,11 @@ export class ChallengeService extends ChallengeRegistry {
             }
         }
 
-        //TODO: Add this to getChallengesForContract without breaking the rest of Peacock?
+        // TODO: Add this to getChallengesForContract without breaking the rest of Peacock?
         challengeGroups["global"] = this.getGroupByIdLoc(
             "global",
             "GLOBAL",
+            session.gameVersion,
         ).Challenges.filter((val) =>
             inclusionDataCheck(val.InclusionData, contractJson),
         )
@@ -465,46 +733,131 @@ export class ChallengeService extends ChallengeRegistry {
 
         for (const group of Object.keys(challengeGroups)) {
             for (const challenge of challengeGroups[group]) {
-                const isDone = this.fastGetIsCompleted(profile, challenge.Id)
+                challengeContexts[challenge.Id] = {
+                    context: undefined,
+                    state: this.fastGetIsCompleted(profile, challenge.Id)
+                        ? "Success"
+                        : undefined,
+                    timers: [],
+                    timesCompleted: 0,
+                }
 
-                if (
-                    challenge.Definition.Scope === "profile" ||
-                    challenge.Definition.Scope === "hit"
-                ) {
+                if (this.needSaveProgression(challenge)) {
                     profile.Extensions.ChallengeProgression[challenge.Id] ??= {
                         Ticked: false,
                         Completed: false,
+                        CurrentState: "Start",
                         State:
                             (<ChallengeDefinitionLike>challenge?.Definition)
                                 ?.Context || {},
                     }
-                }
 
-                // For challenges with scopes being "profile" or "hit",
-                // update challenge progression with the user's progression data
-                const ctx =
-                    challenge.Definition.Scope === "profile" ||
-                    challenge.Definition.Scope === "hit"
-                        ? profile.Extensions.ChallengeProgression[challenge.Id]
-                              .State
-                        : fastClone(
-                              (<ChallengeDefinitionLike>challenge.Definition)
-                                  ?.Context || {},
-                          ) || {}
-
-                challengeContexts[challenge.Id] = {
-                    context: ctx,
-                    state: isDone ? "Success" : "Start",
-                    timers: [],
-                    timesCompleted: 0,
+                    challengeContexts[challenge.Id].context =
+                        profile.Extensions.ChallengeProgression[
+                            challenge.Id
+                        ].State
+                    challengeContexts[challenge.Id].state ??=
+                        profile.Extensions.ChallengeProgression[
+                            challenge.Id
+                        ].CurrentState
+                } else {
+                    challengeContexts[challenge.Id].context =
+                        fastClone(
+                            (<ChallengeDefinitionLike>challenge.Definition)
+                                ?.Context || {},
+                        ) || {}
+                    challengeContexts[challenge.Id].state ??= "Start"
                 }
             }
         }
     }
 
+    /**
+     * Updates the challenge context for a given challenge on an event.
+     * @param event  The event to handle.
+     * @param session  The session to handle the event for.
+     * @param challengeId  The challenge to handle the event for.
+     * @param userData  The user data to update.
+     * @param data  The context of the challenge.
+     */
+    public challengeOnEvent(
+        event: ClientToServerEvent,
+        session: ContractSession,
+        challengeId: string,
+        userData: UserProfile,
+        data: ChallengeContext,
+    ): void {
+        const challenge = this.getChallengeById(
+            challengeId,
+            session.gameVersion,
+        )
+
+        if (!challenge) {
+            log(LogLevel.WARN, `Challenge ${challengeId} not found`)
+            return
+        }
+
+        if (this.fastGetIsCompleted(userData, challengeId)) {
+            return
+        }
+
+        try {
+            const options: HandleEventOptions = {
+                eventName: event.Name,
+                currentState: data.state,
+                timers: data.timers,
+                timestamp: event.Timestamp,
+                contractId: session.contractId,
+                // logger: (category, message) =>
+                //     log(LogLevel.DEBUG, `[${category}] ${message}`),
+            }
+
+            const previousState = data.state
+
+            const result = handleEvent(
+                // @ts-expect-error Needs to be fixed upstream.
+                challenge.Definition,
+                fastClone(data.context),
+                event.Value,
+                options,
+            )
+
+            if (this.needSaveProgression(challenge)) {
+                userData.Extensions.ChallengeProgression[challengeId].State =
+                    result.context
+
+                userData.Extensions.ChallengeProgression[
+                    challengeId
+                ].CurrentState = result.state
+
+                writeUserData(session.userId, session.gameVersion)
+            }
+
+            // Need to update session context for all challenges
+            // to correctly determine challenge completion
+            data.state = result.state
+            data.context = result.context || challenge.Definition?.Context || {}
+
+            if (previousState !== "Success" && result.state === "Success") {
+                this.onChallengeCompleted(
+                    session,
+                    session.userId,
+                    session.gameVersion,
+                    challenge,
+                )
+            }
+        } catch (e) {
+            log(LogLevel.ERROR, e)
+        }
+    }
+
+    /**
+     * Upon an event, updates the context for all challenges in a contract session. Challenges not in the session are ignored.
+     * @param event The event to handle.
+     * @param session The session.
+     */
     onContractEvent(
         event: ClientToServerEvent,
-        sessionId: string,
         session: ContractSession,
     ): void {
         if (!session.challengeContexts) {
@@ -516,67 +869,13 @@ export class ChallengeService extends ChallengeRegistry {
         const userData = getUserData(session.userId, session.gameVersion)
 
         for (const challengeId of Object.keys(session.challengeContexts)) {
-            const challenge = this.getChallengeById(challengeId)
-            const data = session.challengeContexts[challengeId]
-
-            if (!challenge) {
-                log(LogLevel.WARN, `Challenge ${challengeId} not found`)
-                continue
-            }
-
-            if (this.fastGetIsCompleted(userData, challengeId)) {
-                continue
-            }
-
-            try {
-                const options: HandleEventOptions = {
-                    eventName: event.Name,
-                    currentState: data.state,
-                    timers: data.timers,
-                    timestamp: event.Timestamp,
-                    //logger: (category, message) =>
-                    //    log(LogLevel.DEBUG, `[${category}] ${message}`),
-                }
-
-                const previousState = data.state
-
-                const result = handleEvent(
-                    // @ts-expect-error Needs to be fixed upstream.
-                    challenge.Definition,
-                    fastClone(data.context),
-                    event.Value,
-                    options,
-                )
-
-                // For challenges with scopes being "profile" or "hit",
-                // save challenge progression to the user's progression data
-                if (
-                    challenge.Definition.Scope === "profile" ||
-                    challenge.Definition.Scope === "hit"
-                ) {
-                    userData.Extensions.ChallengeProgression[
-                        challengeId
-                    ].State = result.context
-
-                    writeUserData(session.userId, session.gameVersion)
-                }
-                // Need to update session context for all challenges
-                // to correctly determine challenge completion
-                session.challengeContexts[challengeId].state = result.state
-                session.challengeContexts[challengeId].context =
-                    result.context || challenge.Definition?.Context || {}
-
-                if (previousState !== "Success" && result.state === "Success") {
-                    this.onChallengeCompleted(
-                        session,
-                        session.userId,
-                        session.gameVersion,
-                        challenge,
-                    )
-                }
-            } catch (e) {
-                log(LogLevel.ERROR, e)
-            }
+            this.challengeOnEvent(
+                event,
+                session,
+                challengeId,
+                userData,
+                session.challengeContexts[challengeId],
+            )
         }
     }
 
@@ -586,23 +885,37 @@ export class ChallengeService extends ChallengeRegistry {
      * @param contractId The ID of the contract.
      * @param gameVersion The game version requesting the challenges.
      * @param userId The user requesting the challenges' ID.
+     * @param difficulty The upper bound on the difficulty of the challenges to return, defaulted to 4 (return challenges of all difficulties).
      * @returns The challenge tree.
      */
     getChallengeTreeForContract(
         contractId: string,
         gameVersion: GameVersion,
         userId: string,
+        difficulty = 4,
     ): CompiledChallengeTreeCategory[] {
-        const contractData = this.controller.resolveContract(contractId)
+        const userData = getUserData(userId, gameVersion)
+
+        const contractData = this.controller.resolveContract(contractId, true)
 
         if (!contractData) {
             return []
         }
 
-        const subLocation = getSubLocationFromContract(
-            contractData,
-            gameVersion,
-        )
+        const levelData =
+            contractData.Metadata.Type === "arcade" &&
+            contractData.Metadata.Id === contractId
+                ? // contractData, being a group contract, has the same Id as the input id parameter.
+                  // This means that we are requesting the challenges for the next level of the group
+                  this.controller.resolveContract(
+                      contractData.Metadata.GroupDefinition.Order[
+                          getUserEscalationProgress(userData, contractId) - 1
+                      ],
+                      false,
+                  )
+                : this.controller.resolveContract(contractId, false)
+
+        const subLocation = getSubLocationFromContract(levelData, gameVersion)
 
         if (!subLocation) {
             log(
@@ -613,8 +926,10 @@ export class ChallengeService extends ChallengeRegistry {
         }
 
         const forContract = this.getChallengesForContract(
-            contractId,
+            levelData.Metadata.Id,
             gameVersion,
+            userId,
+            difficulty,
         )
         return this.reBatchIntoSwitchedData(
             forContract,
@@ -630,19 +945,8 @@ export class ChallengeService extends ChallengeRegistry {
         gameVersion: GameVersion,
         compiler: Compiler,
     ): CompiledChallengeTreeData[] {
-        const progression = getUserData(userId, gameVersion).Extensions
-            .ChallengeProgression
         return challenges.map((challengeData) => {
-            // Update challenge progression with the user's latest progression data
-            if (
-                !progression[challengeData.Id].Completed &&
-                (challengeData.Definition.Scope === "profile" ||
-                    challengeData.Definition.Scope === "hit")
-            ) {
-                challengeData.Definition.Context =
-                    progression[challengeData.Id].State
-            }
-            const compiled = compiler(
+            return compiler(
                 challengeData,
                 this.getPersistentChallengeProgression(
                     userId,
@@ -652,14 +956,6 @@ export class ChallengeService extends ChallengeRegistry {
                 gameVersion,
                 userId,
             )
-
-            compiled.ChallengeProgress = this.getChallengeDependencyData(
-                challengeData,
-                userId,
-                gameVersion,
-            )
-
-            return compiled
         })
     }
 
@@ -676,7 +972,10 @@ export class ChallengeService extends ChallengeRegistry {
         }
 
         // Handle challenge dependencies
-        const dependencies = this.getDependenciesForChallenge(challengeData.Id)
+        const dependencies = this.getDependenciesForChallenge(
+            challengeData.Id,
+            gameVersion,
+        )
         const completed: string[] = []
         const missing: string[] = []
 
@@ -689,8 +988,10 @@ export class ChallengeService extends ChallengeRegistry {
             missing.push(dependency)
         }
 
-        const { challengeCountData } =
-            ChallengeService._parseContextListeners(challengeData)
+        const { challengeCountData } = ChallengeService._parseContextListeners(
+            challengeData,
+            userData.Extensions.ChallengeProgression[challengeData.Id].State,
+        )
 
         // If this challenge is counting something, AND it relies on other challenges (e.g. SA5, SA12, ...)
         // Then the "count & total" return format prevails.
@@ -737,9 +1038,11 @@ export class ChallengeService extends ChallengeRegistry {
 
         const forLocation = this.getGroupedChallengeLists(
             {
-                type: ChallengeFilterType.None,
+                type: ChallengeFilterType.ParentLocation,
+                parent: locationParentId,
             },
             locationParentId,
+            gameVersion,
         )
 
         return this.reBatchIntoSwitchedData(
@@ -807,10 +1110,17 @@ export class ChallengeService extends ChallengeRegistry {
             ? this.compileRegistryDestinationChallengeData.bind(this)
             : this.compileRegistryChallengeTreeData.bind(this)
 
+        const completion = generateCompletionData(
+            location?.Id,
+            userId,
+            gameVersion,
+        )
+
         return entries.map(([groupId, challenges], index) => {
             const groupData = this.getGroupByIdLoc(
                 groupId,
                 location.Properties.ParentLocation ?? location.Id,
+                gameVersion,
             )
             const challengeProgressionData = challenges.map((challengeData) =>
                 this.getPersistentChallengeProgression(
@@ -823,24 +1133,20 @@ export class ChallengeService extends ChallengeRegistry {
             const lastGroup = this.getGroupByIdLoc(
                 Object.keys(challengeLists)[index - 1],
                 location.Properties.ParentLocation ?? location.Id,
+                gameVersion,
             )
             const nextGroup = this.getGroupByIdLoc(
                 Object.keys(challengeLists)[index + 1],
                 location.Properties.ParentLocation ?? location.Id,
-            )
-
-            const completion = generateCompletionData(
-                location?.Id,
-                userId,
                 gameVersion,
             )
 
             return {
                 Name: groupData?.Name,
-                Description: groupData.Description,
-                Image: groupData.Image,
-                CategoryId: groupData.CategoryId,
-                Icon: groupData.Icon,
+                Description: groupData?.Description,
+                Image: groupData?.Image,
+                CategoryId: groupData?.CategoryId,
+                Icon: groupData?.Icon,
                 ChallengesCount: challenges.length,
                 CompletedChallengesCount: challengeProgressionData.filter(
                     (progressionData) => progressionData.Completed,
@@ -893,6 +1199,17 @@ export class ChallengeService extends ChallengeRegistry {
         userId: string,
         isDestination = false,
     ): CompiledChallengeTreeData {
+        const drops = challenge.Drops.map((e) =>
+            getUnlockableById(e, gameVersion),
+        ).filter(Boolean)
+
+        if (drops.length !== challenge.Drops.length) {
+            log(
+                LogLevel.DEBUG,
+                `Challenge ${challenge.Id} contains non-existing drops!`,
+            )
+        }
+
         return {
             // GetChallengeTreeFor
             Id: challenge.Id,
@@ -902,7 +1219,7 @@ export class ChallengeService extends ChallengeRegistry {
             Rewards: {
                 MasteryXP: challenge.Rewards.MasteryXP,
             },
-            Drops: [],
+            Drops: drops,
             Completed: progression.Completed,
             IsPlayable: isDestination,
             IsLocked: challenge.IsLocked || false,
@@ -925,6 +1242,9 @@ export class ChallengeService extends ChallengeRegistry {
                     userId,
                     gameVersion,
                 ),
+                TypeHeader: challenge.TypeHeader,
+                TypeIcon: challenge.TypeIcon,
+                TypeTitle: challenge.TypeTitle,
             }),
         }
     }
@@ -937,7 +1257,6 @@ export class ChallengeService extends ChallengeRegistry {
     ): CompiledChallengeTreeData {
         let contract: MissionManifest | null
 
-        // TODO: Properly get escalation groups for this
         if (challenge.Type === "contract") {
             contract = this.controller.resolveContract(
                 challenge.InclusionData?.ContractIds?.[0] || "",
@@ -986,7 +1305,7 @@ export class ChallengeService extends ChallengeRegistry {
                 progression,
                 gameVersion,
                 userId,
-                true, //isDestination
+                true, // isDestination
             ),
             UserCentricContract:
                 challenge.Type === "contract"
@@ -1008,7 +1327,7 @@ export class ChallengeService extends ChallengeRegistry {
         challengeLists: GroupIndexedChallengeLists,
         userId: string,
         gameVersion: GameVersion,
-    ): { ChallengesCount: number; CompletedChallengesCount: number } {
+    ): ChallengeCompletion {
         const userData = getUserData(userId, gameVersion)
 
         userData.Extensions.ChallengeProgression ??= {}
@@ -1030,11 +1349,13 @@ export class ChallengeService extends ChallengeRegistry {
         return {
             ChallengesCount: challengesCount,
             CompletedChallengesCount: completedChallengesCount,
+            CompletionPercent: completedChallengesCount / challengesCount,
         }
     }
 
     /**
      * Checks if the conditions to complete a challenge are met. If so, calls `onChallengeCompleted` for it.
+     * @param session The contract session where the challenge was completed.
      * @param challengeId The id of the challenge.
      * @param userData The profile of the user.
      * @param parentId A parent challenge of this challenge, the completion of which might cause this challenge to complete. Pass `undefined` if such a parent is unknown or doesn't exist.
@@ -1059,7 +1380,7 @@ export class ChallengeService extends ChallengeRegistry {
             return
         }
 
-        const allDeps = this._dependencyTree.get(challengeId)
+        const allDeps = this._dependencyTree.get(gameVersion)?.get(challengeId)
         assert.ok(allDeps, `No dep tree for ${challengeId}`)
 
         if (!allDeps.includes(parentId)) {
@@ -1072,7 +1393,7 @@ export class ChallengeService extends ChallengeRegistry {
 
         // Check if the dependency tree is completed now
 
-        const dep = this.getChallengeById(challengeId)
+        const dep = this.getChallengeById(challengeId, gameVersion)
 
         const { challengeCountData } =
             ChallengeService._parseContextListeners(dep)
@@ -1091,7 +1412,7 @@ export class ChallengeService extends ChallengeRegistry {
             session,
             userData.Id,
             gameVersion,
-            this.getChallengeById(challengeId),
+            this.getChallengeById(challengeId, gameVersion),
             parentId,
         )
     }
@@ -1112,13 +1433,28 @@ export class ChallengeService extends ChallengeRegistry {
             log(LogLevel.DEBUG, `Challenge ${challenge.Id} completed`)
         }
 
+        this.onContractEvent(
+            {
+                Value: {
+                    ChallengeId: challenge.Id,
+                },
+                ContractSessionId: session.Id,
+                ContractId: session.contractId,
+                Name: "ChallengeCompleted",
+                // The timestamp (used for timers) is not important here, since it's not an event sent by the game.
+                Timestamp: 0,
+            },
+            session,
+        )
+
         const userData = getUserData(userId, gameVersion)
 
-        //ASSUMED: Challenges that are not global should always be completed
+        // ASSUMED: Challenges that are not global should always be completed
         if (!challenge.Tags.includes("global")) {
             userData.Extensions.ChallengeProgression ??= {}
 
             userData.Extensions.ChallengeProgression[challenge.Id] ??= {
+                CurrentState: "Start",
                 State: {},
                 Completed: false,
                 Ticked: false,
@@ -1128,29 +1464,33 @@ export class ChallengeService extends ChallengeRegistry {
                 true
         }
 
-        //Always count the number of completions
-        session.challengeContexts[challenge.Id].timesCompleted++
+        // Always count the number of completions
+        if (session.challengeContexts[challenge.Id]) {
+            session.challengeContexts[challenge.Id].timesCompleted++
+        }
 
-        //If we have a Definition-scope with a Repeatable, we may want to restart it.
-        //TODO: Figure out what Base/Delta means. For now if Repeatable is set, we restart the challenge.
-        if (challenge.Definition.Repeatable) {
+        // If we have a Definition-scope with a Repeatable, we may want to restart it.
+        // TODO: Figure out what Base/Delta means. For now if Repeatable is set, we restart the challenge.
+        if (
+            challenge.Definition.Repeatable &&
+            session.challengeContexts[challenge.Id]
+        ) {
             session.challengeContexts[challenge.Id].state = "Start"
         }
 
-        //NOTE: Official will always grant XP to both Location Mastery and the Player Profile
-        const actionXp = challenge.Xp || 0
-        const masteryXp = challenge.Rewards?.MasteryXP || 0
-        const xp = actionXp + masteryXp
-
-        this.grantLocationMasteryXp(masteryXp, actionXp, session, userData)
-        this.grantUserXp(xp, session, userData)
-
-        writeUserData(userId, gameVersion)
+        controller.progressionService.grantProfileProgression(
+            challenge.Xp ?? 0,
+            challenge.Rewards?.MasteryXP ?? 0,
+            challenge?.Drops ?? [],
+            session,
+            userData,
+            challenge.LocationId,
+        )
 
         this.hooks.onChallengeCompleted.call(userId, challenge, gameVersion)
 
         // Check if completing this challenge also completes any dependency trees depending on it
-        for (const depTreeId of this._dependencyTree.keys()) {
+        for (const depTreeId of this._dependencyTree.get(gameVersion).keys()) {
             this.tryToCompleteChallenge(
                 session,
                 depTreeId,
@@ -1159,116 +1499,5 @@ export class ChallengeService extends ChallengeRegistry {
                 gameVersion,
             )
         }
-    }
-
-    grantLocationMasteryXp(
-        masteryXp: number,
-        actionXp: number,
-        contractSession: ContractSession,
-        userProfile: UserProfile,
-    ): boolean {
-        const contract = controller.resolveContract(contractSession.contractId)
-
-        if (!contract) {
-            return false
-        }
-
-        const subLocation = getSubLocationByName(
-            contract.Metadata.Location,
-            contractSession.gameVersion,
-        )
-
-        const parentLocationId = subLocation
-            ? subLocation.Properties?.ParentLocation
-            : contract.Metadata.Location
-
-        if (!parentLocationId) {
-            return false
-        }
-
-        const masteryData =
-            this.controller.masteryService.getMasteryPackage(parentLocationId)
-
-        const parentLocationIdLowerCase = parentLocationId.toLocaleLowerCase()
-
-        //Update the Location data
-        userProfile.Extensions.progression.Locations[
-            parentLocationIdLowerCase
-        ] ??= {
-            Xp: 0,
-            Level: 1,
-        }
-
-        const locationData =
-            userProfile.Extensions.progression.Locations[
-                parentLocationIdLowerCase
-            ]
-
-        const maxLevel = masteryData?.MaxLevel || DEFAULT_MASTERY_MAXLEVEL
-
-        if (masteryData) {
-            locationData.Xp = clampValue(
-                locationData.Xp + masteryXp + actionXp,
-                0,
-                contract.Metadata.Type !== "evergreen"
-                    ? xpRequiredForLevel(maxLevel)
-                    : xpRequiredForEvergreenLevel(maxLevel),
-            )
-
-            locationData.Level = clampValue(
-                contract.Metadata.Type !== "evergreen"
-                    ? levelForXp(locationData.Xp)
-                    : evergreenLevelForXp(locationData.Xp),
-                1,
-                maxLevel,
-            )
-        }
-
-        //Update the SubLocation data
-        const profileData = userProfile.Extensions.progression.PlayerProfileXP
-
-        let foundSubLocation = profileData.Sublocations.find(
-            (e) => e.Location === parentLocationId,
-        )
-
-        if (!foundSubLocation) {
-            foundSubLocation = {
-                Location: parentLocationId,
-                Xp: 0,
-                ActionXp: 0,
-            }
-
-            profileData.Sublocations.push(foundSubLocation)
-        }
-
-        foundSubLocation.Xp += masteryXp
-        foundSubLocation.ActionXp += actionXp
-
-        //Update the EvergreenLevel with the latest Mastery Level
-        if (contract.Metadata.Type === "evergreen") {
-            userProfile.Extensions.CPD[contract.Metadata.CpdId][
-                "EvergreenLevel"
-            ] = locationData.Level
-        }
-
-        return true
-    }
-
-    //TODO: Combine with grantLocationMasteryXp?
-    grantUserXp(
-        xp: number,
-        contractSession: ContractSession,
-        userProfile: UserProfile,
-    ): boolean {
-        const profileData = userProfile.Extensions.progression.PlayerProfileXP
-
-        profileData.Total += xp
-        profileData.ProfileLevel = clampValue(
-            levelForXp(profileData.Total),
-            1,
-            getMaxProfileLevel(contractSession.gameVersion),
-        )
-
-        return true
     }
 }

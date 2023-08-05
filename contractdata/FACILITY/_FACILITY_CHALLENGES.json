@@ -1,6 +1,7 @@
 {
     "meta": {
-        "Location": "LOCATION_PARENT_ICA_FACILITY"
+        "Location": "LOCATION_PARENT_ICA_FACILITY",
+        "GameVersion": "h3"
     },
     "groups": [
         {
@@ -28,6 +29,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -79,6 +81,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -130,6 +133,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -199,6 +203,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -250,6 +255,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -301,6 +307,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -352,6 +359,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -406,6 +414,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -457,6 +466,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -511,6 +521,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -608,6 +619,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -649,6 +661,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -690,6 +703,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -731,6 +745,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -772,6 +787,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -813,6 +829,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -854,6 +871,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -912,6 +930,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -953,6 +972,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -996,6 +1016,69 @@
                         }
                     },
                     "Tags": ["story", "medium", "discovery"]
+                },
+                {
+                    "Id": "2546d4f7-191c-4858-840f-321d31aed410",
+                    "Name": "UI_CHALLENGES_PROLOGUE_AREA_DISCOVERED_NAME",
+                    "ImageName": "images/contracts/polarbear/module_002_b/tile.jpg",
+                    "Description": "UI_CHALLENGES_PROLOGUE_AREA_DISCOVERED_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": true,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_EXPLORATION",
+                    "Icon": "challenge_category_discovery",
+                    "LocationId": "LOCATION_ICA_FACILITY_SHIP",
+                    "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
+                    "Type": "location",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Constants": {
+                            "Goal": 5
+                        },
+                        "Context": {
+                            "AreaIDs": []
+                        },
+                        "ContextListeners": {
+                            "AreaIDs": {
+                                "type": "challengecounter",
+                                "count": "($.AreaIDs).Count",
+                                "total": "$.Goal",
+                                "text": "UI_CHALLENGES_PROLOGUE_AREA_DISCOVERED_NAME"
+                            }
+                        },
+                        "Scope": "profile",
+                        "States": {
+                            "Start": {
+                                "AreaDiscovered": [
+                                    {
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "AreaIDs",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "($.AreaIDs).Count",
+                                                "$.Goal"
+                                            ]
+                                        },
+                                        "Transition": "Success"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "discovery", "peacock"]
                 }
             ]
         },
@@ -1024,6 +1107,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1065,6 +1149,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1117,6 +1202,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1152,6 +1238,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1193,6 +1280,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1234,6 +1322,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1295,6 +1384,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1337,6 +1427,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1395,6 +1486,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1447,6 +1539,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1489,6 +1582,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1549,6 +1643,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1632,6 +1727,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1673,6 +1769,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1714,6 +1811,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1745,35 +1843,7 @@
                     "Rewards": {
                         "MasteryXP": 1000
                     },
-                    "Drops": [
-                        {
-                            "Properties": {
-                                "Name": "054f443b-824f-4913-8b29-64dfcd82b089_greenland_hero_trainingsuit_m_hpa745_name_",
-                                "Description": "054f443b-824f-4913-8b29-64dfcd82b089_greenland_hero_trainingsuit_m_hpa745_description_",
-                                "Quality": 4,
-                                "Rarity": "common",
-                                "LoadoutSlot": "disguise",
-                                "IsConsumable": false,
-                                "RepositoryId": "054f443b-824f-4913-8b29-64dfcd82b089",
-                                "OrderIndex": 753
-                            },
-                            "Rarity": "common",
-                            "DisplayNameLocKey": "UI_TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT_NAME",
-                            "Id": "TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT",
-                            "Type": "disguise",
-                            "Subtype": "tactical",
-                            "GameAsset": null,
-                            "ImageId": "",
-                            "RMTPrice": -1,
-                            "GamePrice": -1,
-                            "IsPurchasable": false,
-                            "IsPublished": true,
-                            "IsDroppable": false,
-                            "Capabilities": [],
-                            "Qualities": {},
-                            "Guid": "3af7dc77-f7f0-4ed0-a31b-b42f6327d4b9"
-                        }
-                    ],
+                    "Drops": ["TOKEN_OUTFIT_GREENLAND_HERO_TRAININGSUIT"],
                     "IsPlayable": true,
                     "IsLocked": false,
                     "HideProgression": true,
@@ -1783,6 +1853,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1818,6 +1889,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1938,6 +2010,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1979,6 +2052,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2066,6 +2140,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2108,6 +2183,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2140,31 +2216,7 @@
                     "Rewards": {
                         "MasteryXP": 2000
                     },
-                    "Drops": [
-                        {
-                            "Properties": {
-                                "Quality": 5,
-                                "LoadoutSlot": "gear",
-                                "Rarity": "common",
-                                "RepositoryId": "b39d7a0d-e839-417b-880c-cf9b165d4e11"
-                            },
-                            "Rarity": "common",
-                            "DisplayNameLocKey": "UI_PROP_TOOL_LOCK_PICK_NAME",
-                            "Id": "PROP_TOOL_LOCK_PICK",
-                            "Type": "gear",
-                            "Subtype": "tool",
-                            "GameAsset": null,
-                            "ImageId": "",
-                            "RMTPrice": 149,
-                            "GamePrice": 149,
-                            "IsPurchasable": false,
-                            "IsPublished": true,
-                            "IsDroppable": false,
-                            "Capabilities": [],
-                            "Qualities": {},
-                            "Guid": "7850fd23-3a73-44b9-89f6-2ce634e003b9"
-                        }
-                    ],
+                    "Drops": ["PROP_TOOL_LOCK_PICK"],
                     "IsPlayable": true,
                     "IsLocked": false,
                     "HideProgression": true,
@@ -2174,6 +2226,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2256,6 +2309,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2324,6 +2378,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2566,6 +2621,7 @@
                     "ParentLocationId": "LOCATION_PARENT_ICA_FACILITY",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {

@@ -20,7 +20,7 @@ import type { MissionStory, RequestWithJwt, SceneConfig } from "../types/types"
 import { log, LogLevel } from "../loggingInterop"
 import { _legacyBull, _theLastYardbirdScpc, controller } from "../controller"
 import {
-    contractIdToEscalationGroupId,
+    escalationTypes,
     getLevelCount,
     getUserEscalationProgress,
     resetUserEscalationProgress,
@@ -33,20 +33,21 @@ import {
 import { getConfig } from "../configSwizzleManager"
 import { getUserData, writeUserData } from "../databaseHandler"
 import {
-    fastClone,
     getDefaultSuitFor,
     getMaxProfileLevel,
+    getRemoteService,
     nilUuid,
     unlockOrderComparer,
 } from "../utils"
 
 import type { Response } from "express"
-import { createInventory } from "../inventory"
+import { createInventory, getUnlockableById } from "../inventory"
 import { createSniperLoadouts } from "./sniper"
 import { getFlag } from "../flags"
 import { loadouts } from "../loadouts"
 import { resolveProfiles } from "../profileHandler"
 import { PlanningQuery } from "../types/gameSchemas"
+import { userAuths } from "../officialServerAuth"
 
 export async function planningView(
     req: RequestWithJwt<PlanningQuery>,
@@ -73,20 +74,6 @@ export async function planningView(
         }
     }
 
-    if (isForReset) {
-        const escalationGroupId = contractIdToEscalationGroupId(
-            req.query.contractid,
-        )
-
-        resetUserEscalationProgress(userData, escalationGroupId)
-
-        writeUserData(req.jwt.unique_name, req.gameVersion)
-
-        // now reassign properties and continue
-        req.query.contractid =
-            controller.escalationMappings[escalationGroupId]["1"]
-    }
-
     let contractData =
         req.gameVersion === "h1" &&
         req.query.contractid === "42bac555-bbb9-429d-a8ce-f1ffdf94211c"
@@ -95,24 +82,42 @@ export async function planningView(
             ? _theLastYardbirdScpc
             : controller.resolveContract(req.query.contractid)
 
+    if (isForReset) {
+        const escalationGroupId =
+            contractData.Metadata.InGroup ?? contractData.Metadata.Id
+
+        resetUserEscalationProgress(userData, escalationGroupId)
+
+        writeUserData(req.jwt.unique_name, req.gameVersion)
+
+        // now reassign properties and continue
+        req.query.contractid =
+            controller.escalationMappings.get(escalationGroupId)["1"]
+
+        contractData = controller.resolveContract(req.query.contractid)
+    }
+
     if (!contractData) {
+        // This will only happen for **contracts** that are meant to be fetched from the official servers.
+        // E.g. trending contracts, most played last week, etc.
+        // This will also fetch a contract if the player has downloaded it before but deleted the files.
+        // E.g. the user adds a contract to favorites, then deletes the files, then tries to load the contract again.
         log(
             LogLevel.WARN,
             `Trying to download contract ${req.query.contractid} due to it not found locally.`,
         )
-        const publicId = controller.contractIdToPublicId.get(
-            req.query.contractid,
-        )
-        if (publicId) {
-            const officialJson = await controller.downloadContract(
-                req.jwt.unique_name,
-                publicId,
+        const user = userAuths.get(req.jwt.unique_name)
+        const resp = await user._useService(
+            `https://${getRemoteService(
                 req.gameVersion,
-            )
-            if (officialJson) {
-                contractData = fastClone(officialJson)
-            }
-        }
+            )}.hitman.io/profiles/page/Planning?contractid=${
+                req.query.contractid
+            }&resetescalation=false&forcecurrentcontract=false&errorhandling=false`,
+            true,
+        )
+
+        contractData = resp.data.data.Contract
+        controller.fetchedContracts.set(contractData.Metadata.Id, contractData)
     }
 
     if (!contractData) {
@@ -132,27 +137,37 @@ export async function planningView(
         BestLevel: undefined as number | undefined,
     }
 
-    const escalationGroupId = contractIdToEscalationGroupId(
-        req.query.contractid,
-    )
+    const escalation = escalationTypes.includes(contractData.Metadata.Type)
 
-    if (escalationGroupId) {
+    // It is possible for req.query.contractid to be the id of a group OR a level in that group.
+    let escalationGroupId =
+        contractData.Metadata.InGroup ?? contractData.Metadata.Id
+
+    if (escalation) {
+        const groupContractData = controller.resolveContract(escalationGroupId)
+
         const p = getUserEscalationProgress(userData, escalationGroupId)
+
         const done =
             userData.Extensions.PeacockCompletedEscalations.includes(
                 escalationGroupId,
             )
 
         groupData.GroupId = escalationGroupId
-        groupData.GroupTitle = contractData.Metadata.Title
+        groupData.GroupTitle = groupContractData.Metadata.Title
         groupData.CompletedLevels = done ? p : p - 1
         groupData.Completed = done
-        groupData.TotalLevels = getLevelCount(
-            controller.escalationMappings[escalationGroupId],
-        )
+        groupData.TotalLevels = getLevelCount(groupContractData)
         groupData.BestScore = 0
         groupData.BestPlayer = nilUuid
         groupData.BestLevel = 0
+
+        // Fix contractData to the data of the level in the group.
+        if (!contractData.Metadata.InGroup) {
+            contractData = controller.resolveContract(
+                contractData.Metadata.GroupDefinition.Order[p - 1],
+            )
+        }
     }
 
     if (!contractData) {
@@ -195,7 +210,7 @@ export async function planningView(
     const typedInv = createInventory(
         req.jwt.unique_name,
         req.gameVersion,
-        userData.Extensions.entP,
+        sublocation,
     )
 
     const unlockedEntrances = typedInv
@@ -221,10 +236,7 @@ export async function planningView(
     }
 
     let pistol = "FIREARMS_HERO_PISTOL_TACTICAL_ICA_19"
-    let suit =
-        sublocation.Id === "LOCATION_ANCESTRAL_SMOOTHSNAKE"
-            ? "TOKEN_OUTFIT_ANCESTRAL_HERO_SMOOTHSNAKESUIT"
-            : getDefaultSuitFor(sublocation?.Properties?.ParentLocation)
+    let suit = getDefaultSuitFor(sublocation)
     let tool1 = "TOKEN_FIBERWIRE"
     let tool2 = "PROP_TOOL_COIN"
     let briefcaseProp: string | undefined = undefined
@@ -247,6 +259,7 @@ export async function planningView(
         suit = dlForLocation["3"]
         tool1 = dlForLocation["4"]
         tool2 = dlForLocation["5"]
+
         for (const key of Object.keys(dlForLocation)) {
             if (["2", "3", "4", "5"].includes(key)) {
                 // we're looking for keys that aren't taken up by other things
@@ -260,18 +273,11 @@ export async function planningView(
 
     const i = typedInv.find((item) => item.Unlockable.Id === briefcaseProp)
 
-    const escalation = contractData.Metadata.Type === "escalation"
-
     const userCentric = generateUserCentric(
         contractData,
         req.jwt.unique_name,
         req.gameVersion,
     )
-
-    if (userCentric.Contract.Metadata.Type === "elusive") {
-        // change the type until we figure out why they become unplayable
-        userCentric.Contract.Metadata.Type = "mission"
-    }
 
     const sniperLoadouts = createSniperLoadouts(
         req.jwt.unique_name,
@@ -286,6 +292,126 @@ export async function planningView(
         })
     }
 
+    let loadoutSlots = [
+        {
+            SlotName: "carriedweapon",
+            SlotId: "0",
+            Recommended: null,
+        },
+        {
+            SlotName: "carrieditem",
+            SlotId: "1",
+            Recommended: null,
+        },
+        {
+            SlotName: "concealedweapon",
+            SlotId: "2",
+            Recommended: {
+                item:
+                    contractData.Peacock?.noCarriedWeapon === true
+                        ? null
+                        : typedInv.find(
+                              (item) => item.Unlockable.Id === pistol,
+                          ),
+                type: "concealedweapon",
+            },
+        },
+        {
+            SlotName: "disguise",
+            SlotId: "3",
+            Recommended: {
+                item: typedInv.find((item) => item.Unlockable.Id === suit),
+                type: "disguise",
+            },
+        },
+        {
+            SlotName: "gear",
+            SlotId: "4",
+            Recommended: {
+                item:
+                    contractData.Peacock?.noGear === true
+                        ? null
+                        : typedInv.find((item) => item.Unlockable.Id === tool1),
+                type: "gear",
+            },
+        },
+        {
+            SlotName: "gear",
+            SlotId: "5",
+            Recommended: {
+                item:
+                    contractData.Peacock?.noGear === true
+                        ? null
+                        : typedInv.find((item) => item.Unlockable.Id === tool2),
+                type: "gear",
+            },
+        },
+        {
+            SlotName: "stashpoint",
+            SlotId: "6",
+            Recommended: null,
+        },
+        briefcaseId && {
+            SlotName: briefcaseProp,
+            SlotId: briefcaseId,
+            Recommended: {
+                item: {
+                    ...i,
+                    Properties: {},
+                },
+                type: i.Unlockable.Id,
+                owned: true,
+            },
+            IsContainer: true,
+        },
+    ].filter(Boolean)
+
+    /**
+     * Handles loadout lock for Miami and Hokkaido
+     */
+    const limitedLoadoutUnlockLevelMap = {
+        LOCATION_MIAMI: 2,
+        LOCATION_HOKKAIDO: 20,
+        LOCATION_HOKKAIDO_SHIM_MAMUSHI: 20,
+    }
+
+    if (
+        sublocation?.Properties?.LimitedLoadout &&
+        getFlag("enableMasteryProgression")
+    ) {
+        const loadoutUnlockable = getUnlockableById(
+            req.gameVersion === "h1"
+                ? sublocation?.Properties?.NormalLoadoutUnlock[
+                      contractData.Metadata.Difficulty ?? "normal"
+                  ]
+                : sublocation?.Properties?.NormalLoadoutUnlock,
+            req.gameVersion,
+        )
+
+        if (loadoutUnlockable) {
+            const loadoutMasteryData =
+                controller.masteryService.getMasteryForUnlockable(
+                    loadoutUnlockable,
+                    req.gameVersion,
+                )
+
+            const locationProgression =
+                loadoutMasteryData &&
+                (loadoutMasteryData.SubPackageId
+                    ? userData.Extensions.progression.Locations[
+                          loadoutMasteryData.Location
+                      ][loadoutMasteryData.SubPackageId]
+                    : userData.Extensions.progression.Locations[
+                          loadoutMasteryData.Location
+                      ])
+
+            if (locationProgression.Level < loadoutMasteryData.Level)
+                loadoutSlots = loadoutSlots.filter(
+                    (slot) => !["2", "4", "5"].includes(slot.SlotId),
+                )
+        }
+    }
+
     res.json({
         template:
             req.gameVersion === "h1"
@@ -295,12 +421,9 @@ export async function planningView(
                 : null,
         data: {
             Contract: contractData,
-            ElusiveContractState: "",
+            ElusiveContractState: "not_completed",
             UserCentric: userCentric,
-            IsFirstInGroup: escalation
-                ? controller.escalationMappings[escalationGroupId]["1"] ===
-                  req.query.contractid
-                : true,
+            IsFirstInGroup: escalation ? groupData.CompletedLevels === 0 : true,
             Creator: creatorProfile,
             UserContract: creatorProfile.DevId !== "IOI",
             UnlockedEntrances:
@@ -357,95 +480,9 @@ export async function planningView(
                           .sort(unlockOrderComparer),
             Location: sublocation,
             LoadoutData:
-                contractData.Metadata.Type === "sniper"
-                    ? null
-                    : [
-                          {
-                              SlotName: "carriedweapon",
-                              SlotId: "0",
-                              Recommended: null,
-                          },
-                          {
-                              SlotName: "carrieditem",
-                              SlotId: "1",
-                              Recommended: null,
-                          },
-                          {
-                              SlotName: "concealedweapon",
-                              SlotId: "2",
-                              Recommended: {
-                                  item:
-                                      contractData.Peacock?.noCarriedWeapon ===
-                                      true
-                                          ? null
-                                          : typedInv.find(
-                                                (item) =>
-                                                    item.Unlockable.Id ===
-                                                    pistol,
-                                            ),
-                                  type: "concealedweapon",
-                              },
-                          },
-                          {
-                              SlotName: "disguise",
-                              SlotId: "3",
-                              Recommended: {
-                                  item: typedInv.find(
-                                      (item) => item.Unlockable.Id === suit,
-                                  ),
-                                  type: "disguise",
-                              },
-                          },
-                          {
-                              SlotName: "gear",
-                              SlotId: "4",
-                              Recommended: {
-                                  item:
-                                      contractData.Peacock?.noGear === true
-                                          ? null
-                                          : typedInv.find(
-                                                (item) =>
-                                                    item.Unlockable.Id ===
-                                                    tool1,
-                                            ),
-                                  type: "gear",
-                              },
-                          },
-                          {
-                              SlotName: "gear",
-                              SlotId: "5",
-                              Recommended: {
-                                  item:
-                                      contractData.Peacock?.noGear === true
-                                          ? null
-                                          : typedInv.find(
-                                                (item) =>
-                                                    item.Unlockable.Id ===
-                                                    tool2,
-                                            ),
-                                  type: "gear",
-                              },
-                          },
-                          {
-                              SlotName: "stashpoint",
-                              SlotId: "6",
-                              Recommended: null,
-                          },
-                          briefcaseId && {
-                              SlotName: briefcaseProp,
-                              SlotId: briefcaseId,
-                              Recommended: {
-                                  item: {
-                                      ...i,
-                                      Properties: {},
-                                  },
-                                  type: i.Unlockable.Id,
-                                  owned: true,
-                              },
-                              IsContainer: true,
-                          },
-                      ].filter(Boolean),
-            LimitedLoadoutUnlockLevel: 0, // Hokkaido
+                contractData.Metadata.Type === "sniper" ? null : loadoutSlots,
+            LimitedLoadoutUnlockLevel:
+                limitedLoadoutUnlockLevelMap[sublocation.Id] ?? 0,
             CharacterLoadoutData:
                 sniperLoadouts.length !== 0 ? sniperLoadouts : null,
             ChallengeData: {

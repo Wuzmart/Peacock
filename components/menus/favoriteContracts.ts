@@ -20,21 +20,22 @@ import type {
     GameVersion,
     MissionManifest,
     RequestWithJwt,
-    Unlockable,
     UserCentricContract,
 } from "../types/types"
 import { controller } from "../controller"
 import { generateUserCentric } from "../contracts/dataGen"
 import { getUserData, writeUserData } from "../databaseHandler"
-import { getConfig, getVersionedConfig } from "../configSwizzleManager"
+import { getVersionedConfig } from "../configSwizzleManager"
 import type { Response } from "express"
+import { getUnlockableById } from "../inventory"
 
 export function withLookupDialog(
     req: RequestWithJwt<{ contractId: string }>,
     res: Response,
 ): void {
-    const lookupFavoriteTemplate = getConfig(
+    const lookupFavoriteTemplate = getVersionedConfig(
         "LookupContractFavoriteTemplate",
+        req.gameVersion,
         false,
     )
 
@@ -60,11 +61,10 @@ export function withLookupDialog(
         }
     }
 
-    const sublocation = getVersionedConfig<readonly Unlockable[]>(
-        "allunlockables",
+    const sublocation = getUnlockableById(
+        contract.Metadata.Location,
         req.gameVersion,
-        false,
-    ).find((entry) => entry.Id === contract.Metadata.Location)
+    )
 
     // Must toggle before generating the user centric contract.
     const flag = toggleFavorite(

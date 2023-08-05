@@ -16,8 +16,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable no-inner-declarations */
 // noinspection RequiredAttributes
+
+// load as soon as possible to prevent dependency issues
+import "./generatedPeacockRequireTable"
 
 // load flags as soon as possible
 import { getFlag, loadFlags } from "./flags"
@@ -47,7 +49,13 @@ import type {
 } from "./types/types"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { join } from "path"
-import { log, loggingMiddleware, LogLevel } from "./loggingInterop"
+import {
+    errorLoggingMiddleware,
+    log,
+    loggingMiddleware,
+    LogLevel,
+    requestLoggingMiddleware,
+} from "./loggingInterop"
 import { eventRouter } from "./eventHandler"
 import { contractRoutingRouter } from "./contracts/contractRouting"
 import { profileRouter } from "./profileHandler"
@@ -125,6 +133,11 @@ process.on("uncaughtException", uncaught)
 const app = express()
 
 app.use(loggingMiddleware)
+
+if (getFlag("developmentLogRequests")) {
+    app.use(requestLoggingMiddleware)
+}
+
 app.use("/_wf", webFeaturesRouter)
 
 app.get("/", (req: Request, res) => {
@@ -159,7 +172,10 @@ app.get(
     "/config/:audience/:serverVersion(\\d+_\\d+_\\d+)",
     (req: RequestWithJwt<{ issuer: string }>, res) => {
         const proto = req.protocol
-        const config = getConfig("config", true) as ServerConnectionConfig
+        const config = getConfig(
+            "ServerVersionConfig",
+            true,
+        ) as ServerConnectionConfig
         const serverhost = req.get("Host")
 
         config.Versions[0].GAME_VER = req.params.serverVersion.startsWith("8")
@@ -189,7 +205,6 @@ app.get(
         }
 
         if (req.params.audience === "scpc-prod") {
-            log(LogLevel.DEBUG, "Entering special mode.")
             // sniper challenge is a different game/audience
             config.Versions[0].Name = "scpc-prod"
             config.Versions[0].GAME_VER = "7.3.0"
@@ -218,7 +233,7 @@ app.get(
 app.get("/files/privacypolicy/hm3/privacypolicy_*.json", (req, res) => {
     res.set("Content-Type", "application/octet-stream")
     res.set("x-ms-meta-version", "20181001")
-    res.send(getConfig("privacypolicy", false))
+    res.send(getConfig("PrivacyPolicy", false))
 })
 
 app.post(
@@ -241,64 +256,8 @@ app.post("/oauth/token", (req: RequestWithJwt, res) =>
 
 app.get("/files/onlineconfig.json", (req, res) => {
     res.set("Content-Type", "application/octet-stream")
-    res.send(getConfig("onlineconfig", false))
+    res.send(getConfig("OnlineConfig", false))
 })
-
-app.get(
-    "/profiles/page//dashboard//Dashboard_Category_Sniper_Singleplayer/00000000-0000-0000-0000-000000000015/Contract/ff9f46cf-00bd-4c12-b887-eac491c3a96d",
-    (req: RequestWithJwt, res) => {
-        res.json({
-            template: getConfig("FrankensteinMmSpTemplate", false),
-            data: {
-                Item: {
-                    Id: "ff9f46cf-00bd-4c12-b887-eac491c3a96d",
-                    Type: "Contract",
-                    Title: "UI_CONTRACT_HAWK_TITLE",
-                    Date: new Date().toISOString(),
-                    Data: generateUserCentric(
-                        _theLastYardbirdScpc,
-                        req.jwt.unique_name,
-                        "h1",
-                    ),
-                },
-            },
-        })
-    },
-)
-
-// We handle this for now, but it's not used. For the future though.
-app.get(
-    "/profiles/page//dashboard//Dashboard_Category_Sniper_Multiplayer/00000000-0000-0000-0000-000000000015/Contract/ff9f46cf-00bd-4c12-b887-eac491c3a96d",
-    (req: RequestWithJwt, res) => {
-        const template = getConfig("FrankensteinMmMpTemplate", false)
-
-        /* To enable multiplayer:
-         * Change MultiplayerNotSupported to false
-         * NOTE: REMOVING THIS FULLY WILL BREAK THE EDITED TEMPLATE!
-         */
-
-        res.json({
-            template: template,
-            data: {
-                Item: {
-                    Id: "ff9f46cf-00bd-4c12-b887-eac491c3a96d",
-                    Type: "Contract",
-                    Title: "UI_CONTRACT_HAWK_TITLE",
-                    Date: new Date().toISOString(),
-                    Disabled: true,
-                    Data: {
-                        ...generateUserCentric(
-                            _theLastYardbirdScpc,
-                            req.jwt.unique_name,
-                            "h1",
-                        ),
-                        ...{ MultiplayerNotSupported: true },
-                    },
-                },
-            },
-        })
-    },
-)
 
 // NOTE! All routes attached after this point will be checked for a JWT or blob signature.
 // If you are adding a route that does NOT require authentication, put it ABOVE this message!
@@ -339,7 +298,7 @@ app.use(
                     break
                 case "fghi4567xQOCheZIin0pazB47qGUvZw4":
                 case STEAM_NAMESPACE_2021:
-                    req.serverVersion = "8-11"
+                    req.serverVersion = "8-12"
                     break
                 default:
                     res.status(400).json({ message: "no game data" })
@@ -360,6 +319,62 @@ app.use(
         }),
 )
 
+app.get(
+    "/profiles/page//dashboard//Dashboard_Category_Sniper_Singleplayer/00000000-0000-0000-0000-000000000015/Contract/ff9f46cf-00bd-4c12-b887-eac491c3a96d",
+    (req: RequestWithJwt, res) => {
+        res.json({
+            template: getConfig("FrankensteinMmSpTemplate", false),
+            data: {
+                Item: {
+                    Id: "ff9f46cf-00bd-4c12-b887-eac491c3a96d",
+                    Type: "Contract",
+                    Title: "UI_CONTRACT_HAWK_TITLE",
+                    Date: new Date().toISOString(),
+                    Data: generateUserCentric(
+                        _theLastYardbirdScpc,
+                        req.jwt.unique_name,
+                        "scpc",
+                    ),
+                },
+            },
+        })
+    },
+)
+
+// We handle this for now, but it's not used. For the future though.
+app.get(
+    "/profiles/page//dashboard//Dashboard_Category_Sniper_Multiplayer/00000000-0000-0000-0000-000000000015/Contract/ff9f46cf-00bd-4c12-b887-eac491c3a96d",
+    (req: RequestWithJwt, res) => {
+        const template = getConfig("FrankensteinMmMpTemplate", false)
+
+        /* To enable multiplayer:
+         * Change MultiplayerNotSupported to false
+         * NOTE: REMOVING THIS FULLY WILL BREAK THE EDITED TEMPLATE!
+         */
+
+        res.json({
+            template: template,
+            data: {
+                Item: {
+                    Id: "ff9f46cf-00bd-4c12-b887-eac491c3a96d",
+                    Type: "Contract",
+                    Title: "UI_CONTRACT_HAWK_TITLE",
+                    Date: new Date().toISOString(),
+                    Disabled: true,
+                    Data: {
+                        ...generateUserCentric(
+                            _theLastYardbirdScpc,
+                            req.jwt.unique_name,
+                            "scpc",
+                        ),
+                        ...{ MultiplayerNotSupported: true },
+                    },
+                },
+            },
+        })
+    },
+)
+
 if (getFlag("developmentAllowRuntimeRestart")) {
     app.use(async (req: RequestWithJwt, _res, next): Promise<void> => {
         if (!req.jwt) {
@@ -368,7 +383,7 @@ if (getFlag("developmentAllowRuntimeRestart")) {
             return
         }
 
-        //Make sure the userdata is always loaded if a proper JWT token is available
+        // Make sure the userdata is always loaded if a proper JWT token is available
         await cheapLoadUserData(req.jwt.unique_name, req.gameVersion)
 
         next()
@@ -468,7 +483,7 @@ app.use(
             }
 
             if (
-                ["6-74", "7-3", "7-17", "8-11"].includes(
+                ["6-74", "7-3", "7-17", "8-12"].includes(
                     <string>req.serverVersion,
                 )
             ) {
@@ -485,11 +500,13 @@ app.all("*", (req, res) => {
     res.status(404).send("Not found!")
 })
 
+app.use(errorLoggingMiddleware)
+
 program.description(
     "The Peacock Project is a HITMAN™ World of Assassination Trilogy server built for general use.",
 )
 
-const PEECOCK_ART = `
+const PEECOCK_ART = picocolors.yellow(`
  ███████████  ██████████ ██████████   █████████     ███████      █████████  █████   ████
 ░░███░░░░░███░░███░░░░░█░░███░░░░░█  ███░░░░░███  ███░░░░░███   ███░░░░░███░░███   ███░
  ░███    ░███ ░███  █ ░  ░███  █ ░  ███     ░░░  ███     ░░███ ███     ░░░  ░███  ███
@@ -498,7 +515,7 @@ const PEECOCK_ART = `
  ░███         ░███ ░   █ ░███ ░   █░░███     ███░░███     ███ ░░███     ███ ░███ ░░███
  █████        ██████████ ██████████ ░░█████████  ░░░███████░   ░░█████████  █████ ░░████
 ░░░░░        ░░░░░░░░░░ ░░░░░░░░░░   ░░░░░░░░░     ░░░░░░░      ░░░░░░░░░  ░░░░░   ░░░░
-`
+`)
 
 function startServer(options: { hmr: boolean; pluginDevHost: boolean }): void {
     checkForUpdates()
@@ -568,7 +585,7 @@ function startServer(options: { hmr: boolean; pluginDevHost: boolean }): void {
 
     if (options.hmr) {
         log(LogLevel.DEBUG, "Experimental HMR enabled.")
-        // eslint-disable-next-line @typescript-eslint/require-await
+
         setupHotListener("contracts", () => {
             log(LogLevel.INFO, "Detected a change in contracts! Re-indexing...")
             controller.index()

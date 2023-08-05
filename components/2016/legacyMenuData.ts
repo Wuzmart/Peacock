@@ -22,31 +22,41 @@ import { getConfig } from "../configSwizzleManager"
 import { getDefaultSuitFor, uuidRegex } from "../utils"
 import { json as jsonMiddleware } from "body-parser"
 import { controller } from "../controller"
-import { generateUserCentric, getSubLocationByName } from "../contracts/dataGen"
+import {
+    generateUserCentric,
+    getParentLocationByName,
+    getSubLocationByName,
+} from "../contracts/dataGen"
 import { getUserData } from "../databaseHandler"
 import { log, LogLevel } from "../loggingInterop"
-import { createInventory } from "../inventory"
+import { createInventory, getUnlockableById } from "../inventory"
 import { getFlag } from "../flags"
 import { loadouts } from "../loadouts"
+import { StashpointQueryH2016, StashpointSlotName } from "../types/gameSchemas"
 
 const legacyMenuDataRouter = Router()
 
 legacyMenuDataRouter.get(
     "/stashpoint",
-    (req: RequestWithJwt<{ contractid: string; slotname: string }>, res) => {
-        // stashpoint?contractid=4e45e91a-94ca-4d89-89fc-1b250e608e73&stashpoint=&allowlargeitems=true&slotname=concealedweapon2
+    (req: RequestWithJwt<StashpointQueryH2016>, res) => {
         if (!uuidRegex.test(req.query.contractid)) {
             res.status(400).send("contract id was not a uuid")
             return
         }
 
-        const contractData = controller.resolveContract(req.query.contractid)
-        if (!contractData) {
-            res.status(404).send()
+        if (typeof req.query.slotname !== "string") {
+            res.status(400).send("invalid slot data")
             return
         }
 
-        const loadoutSlots = [
+        const contractData = controller.resolveContract(req.query.contractid)
+
+        if (!contractData) {
+            res.status(404).send("contract not found")
+            return
+        }
+
+        const loadoutSlots: StashpointSlotName[] = [
             "carriedweapon",
             "carrieditem",
             "concealedweapon",
@@ -68,10 +78,15 @@ legacyMenuDataRouter.get(
 
         const userProfile = getUserData(req.jwt.unique_name, req.gameVersion)
 
+        const sublocation = getSubLocationByName(
+            contractData.Metadata.Location,
+            req.gameVersion,
+        )
+
         const inventory = createInventory(
             req.jwt.unique_name,
             req.gameVersion,
-            userProfile.Extensions.entP,
+            sublocation,
         )
 
         const userCentricContract = generateUserCentric(
@@ -80,14 +95,9 @@ legacyMenuDataRouter.get(
             "h1",
         )
 
-        const sublocation = getSubLocationByName(
-            contractData.Metadata.Location,
-            req.gameVersion,
-        )
-
         const defaultLoadout = {
             2: "FIREARMS_HERO_PISTOL_TACTICAL_001_SU_SKIN01",
-            3: getDefaultSuitFor(sublocation?.Properties?.ParentLocation),
+            3: getDefaultSuitFor(sublocation),
             4: "TOKEN_FIBERWIRE",
             5: "PROP_TOOL_COIN",
         }
@@ -146,7 +156,10 @@ legacyMenuDataRouter.get(
                                                 .LoadoutSlot !== "disguise")) && // => display all non-disguise items
                                     (req.query.allowlargeitems === "true" ||
                                         item.Unlockable.Properties
-                                            .LoadoutSlot !== "carriedweapon")
+                                            .LoadoutSlot !== "carriedweapon") &&
+                                    item.Unlockable.Type !==
+                                        "challengemultipler" &&
+                                    !item.Unlockable.Properties.InclusionData
                                 ) // not sure about this one
                             })
                             .map((item) => ({
@@ -171,10 +184,9 @@ legacyMenuDataRouter.get(
                         Page: 0,
                         Recommended: getLoadoutItem(slotid)
                             ? {
-                                  item: inventory.find(
-                                      (item) =>
-                                          item.Unlockable.Id ===
-                                          getLoadoutItem(slotid),
+                                  item: getUnlockableById(
+                                      getLoadoutItem(slotid),
+                                      req.gameVersion,
                                   ),
                                   type: loadoutSlots[slotid],
                                   owned: true,
@@ -208,7 +220,8 @@ legacyMenuDataRouter.get("/Safehouse", (req: RequestWithJwt, res, next) => {
     // call /SafehouseCategory but rewrite the result a bit
     req.url = `/SafehouseCategory?page=0&type=${req.query.type}&subtype=`
     const originalJsonFunc = res.json
-    res.json = function (originalData) {
+
+    res.json = function json(originalData) {
         return originalJsonFunc.call(this, {
             template,
             data: {
@@ -216,6 +229,7 @@ legacyMenuDataRouter.get("/Safehouse", (req: RequestWithJwt, res, next) => {
             },
         })
     }
+
     next()
 })
 
@@ -226,6 +240,11 @@ legacyMenuDataRouter.get(
         req: RequestWithJwt<{ contractSessionId: string; contractId: string }>,
         res,
     ) => {
+        if (typeof req.query.contractId !== "string") {
+            res.status(400).send("invalid contractId")
+            return
+        }
+
         // debriefingchallenges?contractSessionId=00000000000000-00000000-0000-0000-0000-000000000001&contractId=dd906289-7c32-427f-b689-98ae645b407f
         res.json({
             template: getConfig("LegacyDebriefingChallengesTemplate", false),
@@ -239,6 +258,50 @@ legacyMenuDataRouter.get(
                             req.jwt.unique_name,
                         ),
                 },
+            },
+        })
+    },
+)
+
+legacyMenuDataRouter.get(
+    "/MasteryLocation",
+    jsonMiddleware(),
+    (req: RequestWithJwt<{ locationId: string; difficulty: string }>, res) => {
+        const masteryData =
+            controller.masteryService.getMasteryDataForDestination(
+                req.query.locationId,
+                req.gameVersion,
+                req.jwt.unique_name,
+            )
+
+        const location = getParentLocationByName(
+            req.query.locationId,
+            req.gameVersion,
+        )
+
+        res.json({
+            template: getConfig("LegacyMasteryLocationTemplate", false),
+            data: {
+                DifficultyLevelData: [
+                    {
+                        Name: "normal",
+                        Data: {
+                            LocationId: req.query.locationId,
+                            ...masteryData[0],
+                        },
+                        Available: true,
+                    },
+                    {
+                        Name: "pro1",
+                        Data: {
+                            LocationId: req.query.locationId,
+                            ...masteryData[1],
+                        },
+                        Available: true,
+                    },
+                ],
+                LocationId: req.query.locationId,
+                Location: location,
             },
         })
     },

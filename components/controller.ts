@@ -18,9 +18,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "fs"
 import { readdir, readFile, writeFile } from "fs/promises"
-import * as atomically from "atomically"
 import { join } from "path"
-import * as dataGen from "./contracts/dataGen"
 import {
     generateUserCentric,
     getSubLocationFromContract,
@@ -28,7 +26,7 @@ import {
 import type {
     Campaign,
     ClientToServerEvent,
-    CompiledChallengeRuntimeData,
+    CompiledChallengeIngameData,
     ContractSession,
     GameVersion,
     GenSingleMissionFunc,
@@ -52,26 +50,17 @@ import {
     getVersionedConfig,
     swizzle,
 } from "./configSwizzleManager"
-import * as logging from "./loggingInterop"
 import { log, LogLevel } from "./loggingInterop"
 import * as axios from "axios"
-import * as ini from "js-ini"
-import * as statemachineParser from "@peacockproject/statemachine-parser"
-import * as utils from "./utils"
 import {
     addDashesToPublicId,
     fastClone,
     getRemoteService,
     hitmapsUrl,
+    versions,
 } from "./utils"
-import * as sessionSerialization from "./sessionSerialization"
-import * as databaseHandler from "./databaseHandler"
-import * as playnext from "./menus/playnext"
-import * as hooksImpl from "./hooksImpl"
 import { AsyncSeriesHook, SyncBailHook, SyncHook } from "./hooksImpl"
-import * as hitsCategoryServiceMod from "./contracts/hitsCategoryService"
-import { MenuSystemDatabase, menuSystemDatabase } from "./menus/menuSystem"
-import { escalationMappings } from "./contracts/escalationMappings"
+import { menuSystemDatabase } from "./menus/menuSystem"
 import { parse } from "json5"
 import { userAuths } from "./officialServerAuth"
 // @ts-expect-error Ignore JSON import
@@ -88,10 +77,13 @@ import { promisify } from "util"
 import { brotliDecompress } from "zlib"
 import assert from "assert"
 import { Response } from "express"
-import { MissionEndRequestQuery } from "./types/gameSchemas"
 import { ChallengeFilterType } from "./candle/challengeHelpers"
 import { MasteryService } from "./candle/masteryService"
 import { MasteryPackage } from "./types/mastery"
+import { ProgressionService } from "./candle/progressionService"
+import generatedPeacockRequireTable from "./generatedPeacockRequireTable"
+import { escalationTypes } from "./contracts/escalations/escalationService"
+import { orderedETAs } from "./contracts/elusiveTargetArcades"
 
 /**
  * An array of string arrays that contains the IDs of the featured contracts.
@@ -191,44 +183,6 @@ export const featuredContractGroups: string[][] = [
     ],
 ]
 
-const peacockRequireTable = {
-    "@peacockproject/core/contracts/dataGen": { __esModule: true, ...dataGen },
-    "@peacockproject/core/databaseHandler": {
-        __esModule: true,
-        ...databaseHandler,
-    },
-    "@peacockproject/core/utils": {
-        __esModule: true,
-        ...utils,
-    },
-    "@peacockproject/core/loggingInterop": { __esModule: true, ...logging },
-    "@peacockproject/core/sessionSerialization": {
-        __esModule: true,
-        ...sessionSerialization,
-    },
-    "@peacockproject/statemachine-parser": statemachineParser,
-    "@peacockproject/core/menus/playnext": {
-        __esModule: true,
-        ...playnext,
-    },
-    "@peacockproject/core/hooksImpl": {
-        __esModule: true,
-        ...hooksImpl,
-    },
-    "@peacockproject/core/contracts/hitsCategoryService": {
-        __esModule: true,
-        hitsCategoryService: hitsCategoryServiceMod,
-    },
-    "@peacockproject/core/menus/menuSystem": {
-        __esModule: true,
-        MenuSystemDatabase,
-        menuSystemDatabase,
-    },
-    axios,
-    ini,
-    atomically,
-}
-
 /**
  * A binding of the virtual require function that displays the problematic plugin's name.
  *
@@ -242,9 +196,12 @@ function createPeacockRequire(pluginName: string): NodeRequire {
      */
     const peacockRequire: NodeRequire = (specifier: string) => {
         if (
-            Object.prototype.hasOwnProperty.call(peacockRequireTable, specifier)
+            Object.prototype.hasOwnProperty.call(
+                generatedPeacockRequireTable,
+                specifier,
+            )
         ) {
-            return peacockRequireTable[specifier]
+            return generatedPeacockRequireTable[specifier]
         }
 
         try {
@@ -282,10 +239,10 @@ export const _theLastYardbirdScpc: MissionManifest =
     JSON.parse(LASTYARDBIRDSCPC)
 
 export const peacockRecentEscalations: readonly string[] = [
-    "35f1f534-ae2d-42be-8472-dd55e96625ea",
-    "edbacf4b-e402-4548-b723-cd4351571537",
-    "218302a3-f682-46f9-9ffd-bb3e82487b7c",
-    "9a461f89-86c5-44e4-998e-f2f66b496aa7",
+    "74415eca-d01e-4070-9bc9-5ef9b4e8f7d2",
+    "9e0188e8-bdad-476c-b4ce-2faa5d2be56c",
+    "0cceeecb-c8fe-42a4-aee4-d7b575f56a1b",
+    "667f48a3-7f6b-486e-8f6b-2f782a5c4857",
 ]
 
 /**
@@ -322,6 +279,43 @@ export const validateMission = (m: MissionManifest): boolean => {
     }
 
     return true
+}
+
+const internalContracts: Record<string, MissionManifest> = {}
+
+function registerInternals(contracts: MissionManifest[]): void {
+    if (getFlag("elusivesAreShown") === true) {
+        contracts = contracts.map((contract) => {
+            const c = { ...contract }
+
+            switch (c.Metadata.Type) {
+                // @ts-expect-error no-fallthrough
+                case "arcade":
+                    // Fallthrough to objective handling if it isn't a group definition
+                    if (c.Metadata.GroupDefinition) break
+                // @eslint-disable-next-line no-fallthrough
+                case "elusive":
+                    assert.ok(
+                        c.Data.Objectives,
+                        "elusive/arcade has no objectives",
+                    )
+                    c.Data.Objectives = c.Data.Objectives.map((obj) => {
+                        if (obj.SuccessEvent?.EventName === "Kill") {
+                            obj.IsHidden = false
+                        }
+
+                        return obj
+                    })
+                    break
+            }
+
+            return c
+        })
+    }
+
+    for (const contract of contracts) {
+        internalContracts[contract.Metadata.Id] = contract
+    }
 }
 
 const modFrameworkDataPath: string | false =
@@ -379,15 +373,8 @@ export class Controller {
             ],
             PlayNextGetCampaignsHookReturn | undefined
         >
-        getMissionEnd: SyncBailHook<
-            [
-                /** req */ RequestWithJwt<MissionEndRequestQuery>,
-                /** res */ Response,
-            ],
-            boolean
-        >
+        onMissionEnd: SyncHook<[/** session */ ContractSession]>
     }
-    public escalationMappings = escalationMappings
     public configManager: typeof configManagerType = {
         getConfig,
         configs,
@@ -400,20 +387,25 @@ export class Controller {
      * Note: if you are adding a contract, please use {@link addMission}!
      */
     public contracts: Map<string, MissionManifest> = new Map()
-
-    // Converts a contract's ID to public ID.
-    public contractIdToPublicId: Map<string, string> = new Map()
+    /**
+     * Contracts fetched from official.
+     */
+    public fetchedContracts: Map<string, MissionManifest> = new Map()
 
     public challengeService: ChallengeService
     public masteryService: MasteryService
+    escalationMappings: Map<string, Record<string, string>> = new Map()
+    public progressionService: ProgressionService
     /**
      * A list of Simple Mod Framework mods installed.
      */
     public readonly installedMods: readonly string[]
     private _pubIdToContractId: Map<string, string> = new Map()
-    private _internalContracts: MissionManifest[]
     /** Internal elusive target contracts - only accessible during bootstrap. */
     private _internalElusives: MissionManifest[] | undefined
+
+    public locationsWithETA = new Set<string>()
+    public parentsWithETA = new Set<string>()
 
     /**
      * The constructor.
@@ -429,7 +421,7 @@ export class Controller {
             contributeCampaigns: new SyncHook(),
             getSearchResults: new AsyncSeriesHook(),
             getNextCampaignMission: new SyncBailHook(),
-            getMissionEnd: new SyncBailHook(),
+            onMissionEnd: new SyncHook(),
         }
 
         if (modFrameworkDataPath && existsSync(modFrameworkDataPath)) {
@@ -494,8 +486,10 @@ export class Controller {
 
         this.challengeService = new ChallengeService(this)
         this.masteryService = new MasteryService()
+        this.progressionService = new ProgressionService()
 
         this._addElusiveTargets()
+        this._getETALocations()
         this.index()
 
         if (modFrameworkDataPath && existsSync(modFrameworkDataPath)) {
@@ -520,6 +514,44 @@ export class Controller {
                     lastServerSideData.contracts,
                 )) {
                     this.contracts.set(contractId, contractData)
+
+                    if (contractData.SMF.destinations?.addToDestinations) {
+                        if (contractData.SMF.destinations.peacockIntegration) {
+                            if (contractData.SMF.destinations.placeBefore) {
+                                controller.missionsInLocations[
+                                    contractData.Metadata.Location
+                                ].splice(
+                                    controller.missionsInLocations[
+                                        contractData.Metadata.Location
+                                    ].indexOf(
+                                        contractData.SMF.destinations
+                                            .placeBefore,
+                                    ),
+                                    0,
+                                    contractData.Metadata.Id,
+                                )
+                            } else if (
+                                contractData.SMF.destinations.placeAfter
+                            ) {
+                                controller.missionsInLocations[
+                                    contractData.Metadata.Location
+                                ].splice(
+                                    controller.missionsInLocations[
+                                        contractData.Metadata.Location
+                                    ].indexOf(
+                                        contractData.SMF.destinations
+                                            .placeAfter,
+                                    ) + 1,
+                                    0,
+                                    contractData.Metadata.Id,
+                                )
+                            } else {
+                                controller.missionsInLocations[
+                                    contractData.Metadata.Location
+                                ].push(contractData.Metadata.Id)
+                            }
+                        }
+                    }
                 }
             }
 
@@ -553,7 +585,7 @@ export class Controller {
 
         await this._loadPlugins()
 
-        if (pluginDevHost) {
+        if (PEACOCK_DEV && pluginDevHost) {
             await this._loadWorkspacePlugins()
         }
 
@@ -567,6 +599,40 @@ export class Controller {
         } catch (e) {
             log(LogLevel.ERROR, `Fatal error with challenge bootstrap: ${e}`)
             log(LogLevel.ERROR, e.stack)
+        }
+    }
+
+    private _getETALocations(): void {
+        for (const cId of orderedETAs) {
+            const contract = this.resolveContract(cId, true)
+
+            if (!contract) {
+                continue
+            }
+
+            for (const lId of contract.Metadata.GroupDefinition.Order) {
+                const level = this.resolveContract(lId, false)
+
+                if (!level) {
+                    continue
+                }
+
+                this.locationsWithETA.add(level.Metadata.Location)
+            }
+
+            this.locationsWithETA.add(contract.Metadata.Location)
+        }
+
+        const locations = getVersionedConfig<PeacockLocationsData>(
+            "LocationsData",
+            "h3",
+            false,
+        )
+
+        for (const location of this.locationsWithETA) {
+            this.parentsWithETA.add(
+                locations.children[location].Properties.ParentLocation,
+            )
         }
     }
 
@@ -627,6 +693,14 @@ export class Controller {
         return manifest
     }
 
+    private getGroupContract(json: MissionManifest) {
+        if (escalationTypes.includes(json.Metadata.Type)) {
+            return this.resolveContract(json.Metadata.InGroup) ?? json
+        }
+
+        return json
+    }
+
     /**
      * Get a contract by its ID.
      *
@@ -636,31 +710,33 @@ export class Controller {
      * 3. Files in the `contracts` folder.
      *
      * @param id The contract's ID.
+     * @param getGroup When `id` points one of the levels in a contract group, controls whether to get the group contract instead of the individual mission. Defaulted to false. WARNING: If you set this to true, what is returned is not what is pointed to by the inputted `id`.
      * @returns The mission manifest object, or undefined if it wasn't found.
      */
-    public resolveContract(id: string): MissionManifest | undefined {
+    public resolveContract(
+        id: string,
+        getGroup = false,
+    ): MissionManifest | undefined {
         if (!id) {
             return undefined
         }
+
         const optionalPluginJson = this.hooks.getContractManifest.call(id)
 
         if (optionalPluginJson) {
-            return fastClone(optionalPluginJson)
+            return fastClone(
+                getGroup
+                    ? this.getGroupContract(optionalPluginJson)
+                    : optionalPluginJson,
+            )
         }
 
-        const registryJson = this._internalContracts.find(
-            (j) => j.Metadata.Id === id,
-        )
+        const registryJson: MissionManifest | undefined = internalContracts[id]
 
         if (registryJson) {
-            const dereferenced: MissionManifest = fastClone(registryJson)
-
-            if (registryJson.Metadata.Type === "elusive") {
-                dereferenced.Metadata.Type = "mission"
-                return dereferenced
-            }
-
-            return dereferenced
+            return fastClone(
+                getGroup ? this.getGroupContract(registryJson) : registryJson,
+            )
         }
 
         const openCtJson = this.contracts.has(id)
@@ -668,8 +744,21 @@ export class Controller {
             : undefined
 
         if (openCtJson) {
-            return fastClone(openCtJson)
+            return fastClone(
+                getGroup ? this.getGroupContract(openCtJson) : openCtJson,
+            )
         }
+
+        const officialJson = this.fetchedContracts.has(id)
+            ? this.fetchedContracts.get(id)
+            : undefined
+
+        if (officialJson) {
+            return fastClone(
+                getGroup ? this.getGroupContract(officialJson) : officialJson,
+            )
+        }
+
         return undefined
     }
 
@@ -684,50 +773,39 @@ export class Controller {
             return
         }
 
-        this.hooks.getContractManifest.tap(
-            `RegisterContract: ${manifest.Metadata.Id}`,
-            (id) => {
-                if (id === manifest.Metadata.Id) {
-                    return manifest
-                }
+        this.hooks.getContractManifest.tap(manifest.Metadata.Id, (id) => {
+            if (id === manifest.Metadata.Id) {
+                return manifest
+            }
 
-                return undefined
-            },
-        )
+            return undefined
+        })
     }
 
     /**
      * Adds an escalation to the game.
      *
-     * @param groupId The escalation group ID. All levels must have the `Metadata.InGroup` value set to this!
+     * @param groupContract The escalation group contract, ALL levels must have the Id of this in Metadata.InGroup
      * @param locationId The location of the escalation's ID.
      * @param levels The escalation's levels.
      */
     public addEscalation(
-        groupId: string,
+        groupContract: MissionManifest,
         locationId: string,
         ...levels: MissionManifest[]
     ): void {
         const fixedLevels = [...levels].filter(Boolean)
 
+        this.addMission(groupContract)
         fixedLevels.forEach((level) => this.addMission(level))
 
-        if (!this.missionsInLocations.escalations[locationId]) {
-            this.missionsInLocations.escalations[locationId] = []
-        }
+        this.missionsInLocations.escalations[locationId] ??= []
 
-        this.missionsInLocations.escalations[locationId].push(groupId)
+        this.missionsInLocations.escalations[locationId].push(
+            groupContract.Metadata.Id,
+        )
 
-        const escalationGroup = {}
-
-        let i = 0
-
-        while (i + 1 <= fixedLevels.length) {
-            escalationGroup[i + 1] = fixedLevels[i].Metadata.Id
-            i++
-        }
-
-        this.escalationMappings[groupId] = escalationGroup
+        this.scanForGroups()
     }
 
     /**
@@ -820,6 +898,7 @@ export class Controller {
                 }
 
                 this.contracts.set(f.Metadata.Id, f)
+
                 if (f.Metadata.PublicId) {
                     this._pubIdToContractId.set(
                         f.Metadata.PublicId,
@@ -839,34 +918,7 @@ export class Controller {
      * @internal
      */
     _addElusiveTargets(): void {
-        if (getFlag("elusivesAreShown") === true) {
-            this._internalContracts.push(
-                ...this._internalElusives!.map((elusive) => {
-                    const e = { ...elusive }
-
-                    assert.ok(e.Data.Objectives, "no objectives on ET")
-
-                    e.Data.Objectives = e.Data.Objectives.map(
-                        (missionObjective) => {
-                            if (
-                                missionObjective.SuccessEvent?.EventName ===
-                                "Kill"
-                            ) {
-                                missionObjective.IsHidden = false
-                            }
-
-                            return missionObjective
-                        },
-                    )
-
-                    return e
-                }),
-            )
-            this._internalElusives = undefined
-            return
-        }
-
-        this._internalContracts.push(...this._internalElusives!)
+        registerInternals(this._internalElusives!)
         this._internalElusives = undefined
     }
 
@@ -906,6 +958,45 @@ export class Controller {
         return fetchedData!.contract!.Contract
     }
 
+    /**
+     * Get all global challenges and register a simplified version of them.
+     * @param gameVersion A GameVersion object representing the version of the game.
+     *
+     */
+    private registerGlobalChallenges(gameVersion: GameVersion) {
+        const regGlobalChallenges: RegistryChallenge[] = getVersionedConfig<
+            CompiledChallengeIngameData[]
+        >("GlobalChallenges", gameVersion, true).map((e) => {
+            const tags = e.Tags || []
+            tags.push("global")
+
+            // NOTE: Treat all other fields as undefined
+            return <RegistryChallenge>{
+                Id: e.Id,
+                Tags: tags,
+                Name: e.Name,
+                ImageName: e.ImageName,
+                Description: e.Description,
+                Definition: e.Definition,
+                Xp: e.Xp ?? 0,
+                InclusionData: e.InclusionData,
+            }
+        })
+
+        this._handleChallengeResources({
+            groups: [
+                <SavedChallengeGroup>{
+                    CategoryId: "global",
+                    Challenges: regGlobalChallenges,
+                },
+            ],
+            meta: {
+                Location: "GLOBAL",
+                GameVersion: gameVersion,
+            },
+        })
+    }
+
     private async _loadResources(): Promise<void> {
         // Load challenge resources
         const challengeDirectory = join(
@@ -921,40 +1012,8 @@ export class Controller {
             },
         )
 
-        //Get all global challenges and register a simplified version of them
-        {
-            const globalChallenges: RegistryChallenge[] = (
-                getConfig(
-                    "GlobalChallenges",
-                    true,
-                ) as CompiledChallengeRuntimeData[]
-            ).map((e) => {
-                const tags = e.Challenge.Tags || []
-                tags.push("global")
-
-                //NOTE: Treat all other fields as undefined
-                return <RegistryChallenge>{
-                    Id: e.Challenge.Id,
-                    Tags: tags,
-                    Name: e.Challenge.Name,
-                    ImageName: e.Challenge.ImageName,
-                    Description: e.Challenge.Description,
-                    Definition: e.Challenge.Definition,
-                    Xp: e.Challenge.Xp,
-                }
-            })
-
-            this._handleChallengeResources({
-                groups: [
-                    <SavedChallengeGroup>{
-                        CategoryId: "global",
-                        Challenges: globalChallenges,
-                    },
-                ],
-                meta: {
-                    Location: "GLOBAL",
-                },
-            })
+        for (const gameVersion of versions) {
+            this.registerGlobalChallenges(gameVersion)
         }
 
         // Load mastery resources
@@ -992,23 +1051,18 @@ export class Controller {
 
     private _handleChallengeResources(data: ChallengePackage): void {
         for (const group of data.groups) {
-            if (
-                [
-                    "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ARCADE",
-                    "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ESCALATION_HM1",
-                    "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ESCALATION_HM2",
-                ].includes(group.Name)
-            ) {
-                continue
-            }
-
-            this.challengeService.registerGroup(group, data.meta.Location)
+            this.challengeService.registerGroup(
+                group,
+                data.meta.Location,
+                data.meta.GameVersion,
+            )
 
             for (const challenge of group.Challenges) {
                 this.challengeService.registerChallenge(
                     challenge,
                     group.CategoryId,
                     data.meta.Location,
+                    data.meta.GameVersion,
                 )
             }
         }
@@ -1072,6 +1126,7 @@ export class Controller {
                 await this._executePlugin(plugin, src, sourceFile)
             }
         }
+
         const entries = (await readdir(process.cwd())).filter(
             (n) => isPlugin(n, "js") || isPlugin(n, "cjs"),
         )
@@ -1171,17 +1226,50 @@ export class Controller {
             el: MissionManifest[]
         }
 
-        this._internalContracts = decompressed.b
+        registerInternals(decompressed.b)
         this._internalElusives = decompressed.el
+        this.scanForGroups()
     }
 
-    public storeIdToPublicId(contracts: UserCentricContract[]): void {
-        contracts.forEach((c) =>
-            controller.contractIdToPublicId.set(
-                c.Contract.Metadata.Id,
-                c.Contract.Metadata.PublicId,
-            ),
-        )
+    scanForGroups(): void {
+        let groupCount = 0
+
+        allGroups: for (const contractId of new Set<string>([
+            ...Object.keys(internalContracts),
+            ...this.hooks.getContractManifest.allTapNames,
+        ])) {
+            const contract = this.resolveContract(contractId)
+
+            if (!contract?.Metadata?.GroupDefinition) {
+                continue
+            }
+
+            const escalationGroup: Record<number, string> = {}
+
+            let i = 0
+
+            const order = contract.Metadata.GroupDefinition.Order
+
+            while (i + 1 <= order.length) {
+                const next = this.resolveContract(order[i])
+
+                if (!next) {
+                    log(
+                        LogLevel.ERROR,
+                        `Could not find next contract (${order[i]}) in group ${contractId}!`,
+                    )
+                    continue allGroups
+                }
+
+                escalationGroup[i + 1] = next.Metadata.Id
+                i++
+            }
+
+            this.escalationMappings.set(contract.Metadata.Id, escalationGroup)
+            groupCount++
+        }
+
+        log(LogLevel.DEBUG, `Discovered ${groupCount} escalation groups.`)
     }
 }
 
@@ -1211,27 +1299,6 @@ export function isPlugin(name: string, extension: string): boolean {
 }
 
 /**
- * Returns if the specified repository ID is a suit.
- *
- * @param repoId The repository ID.
- * @param gameVersion The game version.
- * @returns If the repository ID points to a suit.
- */
-export function isSuit(repoId: string, gameVersion: GameVersion): boolean {
-    const suitsToTypeMap = new Map<string, string>()
-
-    ;(getVersionedConfig("allunlockables", gameVersion, false) as Unlockable[])
-        .filter((unlockable) => unlockable.Type === "disguise")
-        .forEach((u) =>
-            suitsToTypeMap.set(u.Properties.RepositoryId, u.Subtype),
-        )
-
-    return suitsToTypeMap.has(repoId)
-        ? suitsToTypeMap.get(repoId) !== "disguise"
-        : false
-}
-
-/**
  * Translates a contract ID to a "hit" object.
  *
  * @param contractId The contract's ID.
@@ -1247,9 +1314,7 @@ export function contractIdToHitObject(
     const contract = controller.resolveContract(contractId)
 
     if (!contract) {
-        throw new Error(
-            "Something went terribly wrong. Please investigate this or inform rdil.",
-        )
+        return undefined
     }
 
     if (
@@ -1268,7 +1333,7 @@ export function contractIdToHitObject(
     ).parents[subLocation?.Properties?.ParentLocation]
 
     // failed to find the location, must be from a newer game
-    if (!subLocation && (gameVersion === "h1" || gameVersion === "h2")) {
+    if (!subLocation && ["h1", "h2", "scpc"].includes(gameVersion)) {
         log(
             LogLevel.DEBUG,
             `${contract.Metadata.Location} looks to be from a newer game, skipping (hitObj)!`,
@@ -1285,9 +1350,11 @@ export function contractIdToHitObject(
 
     const challenges = controller.challengeService.getGroupedChallengeLists(
         {
-            type: ChallengeFilterType.None,
+            type: ChallengeFilterType.ParentLocation,
+            parent: parentLocation?.Id,
         },
         parentLocation?.Id,
+        gameVersion,
     )
 
     const challengeCompletion =
@@ -1304,11 +1371,11 @@ export function contractIdToHitObject(
         SubLocation: subLocation,
         ChallengesCompleted: challengeCompletion.CompletedChallengesCount,
         ChallengesTotal: challengeCompletion.ChallengesCount,
-        LocationLevel: 1,
-        LocationMaxLevel: 1,
-        LocationCompletion: 0,
-        LocationXPLeft: 6000,
-        LocationHideProgression: false,
+        LocationLevel: userCentric.Data.LocationLevel,
+        LocationMaxLevel: userCentric.Data.LocationMaxLevel,
+        LocationCompletion: userCentric.Data.LocationCompletion,
+        LocationXPLeft: userCentric.Data.LocationXpLeft,
+        LocationHideProgression: userCentric.Data.LocationHideProgression,
     }
 }
 

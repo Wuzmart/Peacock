@@ -1,6 +1,7 @@
 {
     "meta": {
-        "Location": "LOCATION_PARENT_COLORADO"
+        "Location": "LOCATION_PARENT_COLORADO",
+        "GameVersion": "h3"
     },
     "groups": [
         {
@@ -28,6 +29,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -123,6 +125,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -203,6 +206,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -294,6 +298,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -382,6 +387,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -423,6 +429,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -518,6 +525,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -570,6 +578,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -622,6 +631,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -674,6 +684,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -726,6 +737,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -828,6 +840,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -880,6 +893,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -932,6 +946,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -984,6 +999,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1036,6 +1052,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1138,6 +1155,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1251,6 +1269,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1353,6 +1372,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1405,6 +1425,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1482,6 +1503,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1554,6 +1576,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1754,6 +1777,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1799,6 +1823,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1873,6 +1898,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1918,6 +1944,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -1986,6 +2013,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2028,6 +2056,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2080,6 +2109,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2134,6 +2164,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2176,6 +2207,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2218,6 +2250,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2260,6 +2293,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2302,6 +2336,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2344,6 +2379,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2386,6 +2422,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2428,6 +2465,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2470,6 +2508,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2508,6 +2547,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2597,6 +2637,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2659,6 +2700,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2697,6 +2739,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2754,6 +2797,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2796,6 +2840,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2837,6 +2882,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2878,6 +2924,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2920,6 +2967,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -2961,6 +3009,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3002,6 +3051,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3056,6 +3106,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3098,6 +3149,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3150,6 +3202,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3192,6 +3245,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3230,6 +3284,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3294,6 +3349,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3332,6 +3388,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3370,6 +3427,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3436,6 +3494,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3510,6 +3569,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "location",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3529,6 +3589,92 @@
                         }
                     },
                     "Tags": ["story", "medium", "feats"]
+                },
+                {
+                    "Id": "ee2cb38f-f2ff-4da7-a37d-366fbe3836e9",
+                    "Name": "UI_CONTRACT_SKULLCAP_GROUP_TITLE",
+                    "ImageName": "images/contracts/escalation/ContractEscalation_Colorado_Skullcap.jpg",
+                    "Description": "UI_CHALLENGES_ESCLATION_COMPLETE_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_COLORADO",
+                    "ParentLocationId": "LOCATION_PARENT_COLORADO",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$ContractId",
+                                            "aa456df8-2294-4e29-a792-fc0f46576830"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["feats", "hard"],
+                    "InclusionData": {
+                        "ContractIds": ["e6f4d3a4-9a33-4bd9-b761-da297069cf8c"]
+                    }
+                },
+                {
+                    "Id": "4edffaea-5785-4307-8dde-8faf9703b6ce",
+                    "Name": "UI_CONTRACT_THISTLE_GROUP_TITLE",
+                    "ImageName": "images/contracts/escalation/ContractEscalation_Colorado_Thistle.jpg",
+                    "Description": "UI_CHALLENGES_ESCLATION_COMPLETE_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": true,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_COMMUNITY",
+                    "Icon": "challenge_category_feats",
+                    "LocationId": "LOCATION_COLORADO",
+                    "ParentLocationId": "LOCATION_PARENT_COLORADO",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$ContractId",
+                                            "fc6ec4fe-59c7-4c2f-8dd1-00635e29239f"
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["feats", "hard"],
+                    "InclusionData": {
+                        "ContractIds": ["4186dd23-1cfc-4ba0-9863-9f19f7cba249"]
+                    }
                 }
             ]
         },
@@ -3557,6 +3703,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3599,6 +3746,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3641,6 +3789,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3683,6 +3832,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3734,6 +3884,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -3962,6 +4113,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4204,6 +4356,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4432,6 +4585,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4673,6 +4827,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4749,6 +4904,7 @@
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": ["easy"],
+                    "OrderIndex": 10000,
                     "XpModifier": {},
                     "RuntimeType": "Hit",
                     "Definition": {
@@ -4784,54 +4940,598 @@
             ]
         },
         {
-            "Name": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ARCADE",
-            "Image": "images/challenges/categories/feats/tile.jpg",
-            "Icon": "arcademode",
-            "CategoryId": "arcade",
-            "Description": "UI_MENU_PAGE_CHALLENGE_CATEGORY_DESCRIPTION_ARCADE",
+            "Name": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+            "Image": "images/challenges/categories/elusive/tile.jpg",
+            "Icon": "elusive",
+            "CategoryId": "elusive",
+            "Description": "UI_MENU_PAGE_CHALLENGE_CATEGORY_DESCRIPTION_ELUSIVE",
             "Challenges": [
                 {
-                    "Id": "a5a2dfca-9c78-4720-9bdb-173bb441e1da",
-                    "Name": "UI_HONEYDEW_COMPLETION_CHALLENGE_NAME",
-                    "ImageName": "images/contracts/arcade/Arcade_Honeydew_Group.jpg",
-                    "Description": "UI_HONEYDEW_COMPLETION_CHALLENGE_DESC",
+                    "Id": "d8f8a8fb-4b3c-4e2a-ac20-2d864a449ebe",
+                    "Name": "UI_CHALLENGES_ET_BUSHWACKER_TARGETDOWN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_bushwacker_targetdown.jpg",
+                    "Description": "UI_CHALLENGES_ET_BUSHWACKER_TARGETDOWN_DESC",
                     "Rewards": {
-                        "MasteryXP": 4000
+                        "MasteryXP": 2000
                     },
                     "Drops": [],
-                    "IsPlayable": true,
+                    "IsPlayable": false,
                     "IsLocked": false,
                     "HideProgression": false,
-                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ARCADE",
-                    "Icon": "arcademode",
-                    "LocationId": "LOCATION_PARENT_COLORADO",
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_COLORADO",
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": ["$Value.IsTarget", true]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "elusive"],
                     "InclusionData": {
-                        "ContractIds": ["ff5b4e53-49ea-4d85-b94e-d3c8b3fc7ab3"]
+                        "ContractIds": ["550c4d75-ca87-4be7-a18e-caf30e6c8136"]
                     }
                 },
                 {
-                    "Id": "873cb734-e1f5-43b5-ac5c-0fbf406fe5bc",
-                    "Name": "UI_PEAR_COMPLETION_CHALLENGE_NAME",
-                    "ImageName": "images/contracts/arcade/Arcade_Pear_Group.jpg",
-                    "Description": "UI_PEAR_COMPLETION_CHALLENGE_DESC",
+                    "Id": "bade239d-1102-4ddf-9dfa-c848c007bf3e",
+                    "Name": "UI_CHALLENGES_ET_BUSHWACKER_SILENT_ASSASSIN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_bushwacker_silentassassin.jpg",
+                    "Description": "UI_CHALLENGES_ET_BUSHWACKER_SILENT_ASSASSIN_DESC",
                     "Rewards": {
                         "MasteryXP": 4000
                     },
                     "Drops": [],
-                    "IsPlayable": true,
+                    "IsPlayable": false,
                     "IsLocked": false,
                     "HideProgression": false,
-                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ARCADE",
-                    "Icon": "arcademode",
-                    "LocationId": "LOCATION_PARENT_COLORADO",
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_COLORADO",
                     "ParentLocationId": "LOCATION_PARENT_COLORADO",
                     "Type": "contract",
                     "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {
+                            "Witnesses": [],
+                            "KilledTargets": [],
+                            "RecordingDestroyed": true,
+                            "LastAccidentTime": 0
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    true,
+                                                    "$.RecordingDestroyed"
+                                                ]
+                                            },
+                                            {
+                                                "$all": {
+                                                    "in": "$.Witnesses",
+                                                    "?": {
+                                                        "$any": {
+                                                            "in": "$.KilledTargets",
+                                                            "?": {
+                                                                "$eq": [
+                                                                    "$.#",
+                                                                    "$.##"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                },
+                                "AccidentBodyFound": {
+                                    "$set": ["LastAccidentTime", "$Timestamp"]
+                                },
+                                "Witnesses": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Spotted": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$Value.KillContext",
+                                                            1
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.KillContext",
+                                                        1
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": ["$Value.IsTarget", true]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "CrowdNPC_Died": {
+                                    "Transition": "Failure"
+                                },
+                                "MurderedBodySeen": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.IsWitnessTarget",
+                                                true
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Witnesses",
+                                                "$Value.Witness"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsWitnessTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$.LastAccidentTime",
+                                                            "$Timestamp"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    }
+                                ],
+                                "SecuritySystemRecorder": [
+                                    {
+                                        "Actions": {
+                                            "$set": [
+                                                "RecordingDestroyed",
+                                                false
+                                            ]
+                                        },
+                                        "Condition": {
+                                            "$eq": ["$Value.event", "spotted"]
+                                        }
+                                    },
+                                    {
+                                        "Actions": {
+                                            "$set": ["RecordingDestroyed", true]
+                                        },
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "erased"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "destroyed"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "hard", "elusive"],
                     "InclusionData": {
-                        "ContractIds": ["b4d555eb-e2c9-40c2-b155-328a7019fd28"]
+                        "ContractIds": ["550c4d75-ca87-4be7-a18e-caf30e6c8136"]
+                    }
+                },
+                {
+                    "Id": "3d2e38c4-a96c-43cb-bec1-d775e28f3fd2",
+                    "Name": "UI_CHALLENGES_ET_FLIRTINI_TARGETDOWN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_flirtini_targetdown.jpg",
+                    "Description": "UI_CHALLENGES_ET_FLIRTINI_TARGETDOWN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 2000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_COLORADO",
+                    "ParentLocationId": "LOCATION_PARENT_COLORADO",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "Kill": {
+                                    "Condition": {
+                                        "$eq": ["$Value.IsTarget", true]
+                                    },
+                                    "Transition": "Success"
+                                }
+                            }
+                        }
+                    },
+                    "Tags": ["story", "medium", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["655c5a57-69d1-48b6-a14b-2ae396c16174"]
+                    }
+                },
+                {
+                    "Id": "96377c1f-e2e4-4008-bf9f-ced0e9a016e9",
+                    "Name": "UI_CHALLENGES_ET_FLIRTINI_SILENT_ASSASSIN_NAME",
+                    "ImageName": "images/challenges/elusive_target/et_flirtini_silentassassin.jpg",
+                    "Description": "UI_CHALLENGES_ET_FLIRTINI_SILENT_ASSASSIN_DESC",
+                    "Rewards": {
+                        "MasteryXP": 4000
+                    },
+                    "Drops": [],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_COLORADO",
+                    "ParentLocationId": "LOCATION_PARENT_COLORADO",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {
+                            "Witnesses": [],
+                            "KilledTargets": [],
+                            "RecordingDestroyed": true,
+                            "LastAccidentTime": 0
+                        },
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractEnd": {
+                                    "Condition": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    true,
+                                                    "$.RecordingDestroyed"
+                                                ]
+                                            },
+                                            {
+                                                "$all": {
+                                                    "in": "$.Witnesses",
+                                                    "?": {
+                                                        "$any": {
+                                                            "in": "$.KilledTargets",
+                                                            "?": {
+                                                                "$eq": [
+                                                                    "$.#",
+                                                                    "$.##"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "Transition": "Success"
+                                },
+                                "AccidentBodyFound": {
+                                    "$set": ["LastAccidentTime", "$Timestamp"]
+                                },
+                                "Witnesses": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Spotted": {
+                                    "Condition": {
+                                        "$any": {
+                                            "in": "$Value",
+                                            "?": {
+                                                "$pushunique": [
+                                                    "Witnesses",
+                                                    "$.#"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "Kill": [
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$Value.KillContext",
+                                                            1
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.KillContext",
+                                                        1
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$eq": ["$Value.IsTarget", true]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "KilledTargets",
+                                                "$Value.RepositoryId"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "CrowdNPC_Died": {
+                                    "Transition": "Failure"
+                                },
+                                "MurderedBodySeen": [
+                                    {
+                                        "Condition": {
+                                            "$eq": [
+                                                "$Value.IsWitnessTarget",
+                                                true
+                                            ]
+                                        },
+                                        "Actions": {
+                                            "$pushunique": [
+                                                "Witnesses",
+                                                "$Value.Witness"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "Condition": {
+                                            "$and": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.IsWitnessTarget",
+                                                        false
+                                                    ]
+                                                },
+                                                {
+                                                    "$not": {
+                                                        "$eq": [
+                                                            "$.LastAccidentTime",
+                                                            "$Timestamp"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "Transition": "Failure"
+                                    }
+                                ],
+                                "SecuritySystemRecorder": [
+                                    {
+                                        "Actions": {
+                                            "$set": [
+                                                "RecordingDestroyed",
+                                                false
+                                            ]
+                                        },
+                                        "Condition": {
+                                            "$eq": ["$Value.event", "spotted"]
+                                        }
+                                    },
+                                    {
+                                        "Actions": {
+                                            "$set": ["RecordingDestroyed", true]
+                                        },
+                                        "Condition": {
+                                            "$or": [
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "erased"
+                                                    ]
+                                                },
+                                                {
+                                                    "$eq": [
+                                                        "$Value.event",
+                                                        "destroyed"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "hard", "elusive"],
+                    "InclusionData": {
+                        "ContractIds": ["655c5a57-69d1-48b6-a14b-2ae396c16174"]
+                    }
+                },
+                {
+                    "Id": "efd539cf-7b0e-4940-b8dd-a7407deea12f",
+                    "Name": "UI_CHALLENGES_ELUSIVE_TARGET_COLORADO_NAME",
+                    "ImageName": "images/challenges/profile_challenges/elusive_target_colorado.jpg",
+                    "Description": "UI_CHALLENGES_ELUSIVE_TARGET_COLORADO_DESC",
+                    "Rewards": {
+                        "MasteryXP": 0
+                    },
+                    "Drops": ["TOKEN_OUTFIT_HERO_COLORADOSUIT_ALTERNATIVE"],
+                    "IsPlayable": false,
+                    "IsLocked": false,
+                    "HideProgression": false,
+                    "CategoryName": "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
+                    "Icon": "elusive",
+                    "LocationId": "LOCATION_COLORADO",
+                    "ParentLocationId": "LOCATION_PARENT_COLORADO",
+                    "Type": "contract",
+                    "DifficultyLevels": [],
+                    "OrderIndex": 10000,
+                    "XpModifier": {},
+                    "RuntimeType": "Hit",
+                    "Definition": {
+                        "Context": {},
+                        "Scope": "session",
+                        "States": {
+                            "Start": {
+                                "ContractStart": {
+                                    "Condition": {
+                                        "$eq": [
+                                            "$Value.ContractType",
+                                            "elusive"
+                                        ]
+                                    },
+                                    "Transition": "State_ValidContract"
+                                }
+                            },
+                            "State_ValidContract": {
+                                "ContractEnd": [
+                                    {
+                                        "Transition": "Success"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "Tags": ["story", "elusive"],
+                    "InclusionData": {
+                        "ContractTypes": ["elusive"]
                     }
                 }
             ]

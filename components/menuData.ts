@@ -16,23 +16,23 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { missionEnd } from "./scoreHandler"
 import { Response, Router } from "express"
 import {
     contractCreationTutorialId,
-    DEFAULT_MASTERY_MAXLEVEL,
     gameDifficulty,
     getMaxProfileLevel,
+    isSniperLocation,
+    isSuit,
     PEACOCKVERSTRING,
     unlockOrderComparer,
     uuidRegex,
 } from "./utils"
 import { contractSessions, getSession } from "./eventHandler"
-import { missionEnd } from "./scoreHandler"
 import { getConfig, getVersionedConfig } from "./configSwizzleManager"
 import {
     contractIdToHitObject,
     controller,
-    isSuit,
     peacockRecentEscalations,
 } from "./controller"
 import { makeCampaigns } from "./menus/campaigns"
@@ -42,28 +42,27 @@ import {
     getDestinationCompletion,
 } from "./menus/destinations"
 import type {
+    ChallengeCategoryCompletion,
     CommonSelectScreenConfig,
-    contractSearchResult,
+    ContractSearchResult,
     GameVersion,
     HitsCategoryCategory,
     IHit,
     MissionManifest,
     PeacockLocationsData,
     PlayerProfileView,
+    ProgressionData,
     RequestWithJwt,
     SafehouseCategory,
     SceneConfig,
-    Unlockable,
     UserCentricContract,
 } from "./types/types"
-import {
-    getMenuDetailsForEscalation,
-    getUserEscalationProgress,
-} from "./contracts/escalations/escalationService"
+import { no2016 } from "./contracts/escalations/escalationService"
 import {
     complications,
     generateCompletionData,
     generateUserCentric,
+    getSubLocationByName,
 } from "./contracts/dataGen"
 import { log, LogLevel } from "./loggingInterop"
 import {
@@ -74,10 +73,12 @@ import random from "random"
 import { getUserData } from "./databaseHandler"
 import {
     createMainOpportunityTile,
+    createMenuPageTile,
     createPlayNextTile,
     getSeasonId,
     orderedMissions,
     orderedPZMissions,
+    sniperMissionIds,
 } from "./menus/playnext"
 import { randomUUID } from "crypto"
 import { planningView } from "./menus/planning"
@@ -90,7 +91,7 @@ import { swapToBrowsingMenusStatus } from "./discordRp"
 import axios from "axios"
 import { getFlag } from "./flags"
 import { fakePlayerRegistry } from "./profileHandler"
-import { createInventory } from "./inventory"
+import { createInventory, getUnlockableById } from "./inventory"
 import { missionsInLocations } from "./contracts/missionsInLocation"
 import { json as jsonMiddleware } from "body-parser"
 import { hitsCategoryService } from "./contracts/hitsCategoryService"
@@ -101,7 +102,6 @@ import {
     StashpointQuery,
 } from "./types/gameSchemas"
 import assert from "assert"
-import { SniperLoadoutConfig } from "./menus/sniper"
 
 export const preMenuDataRouter = Router()
 const menuDataRouter = Router()
@@ -109,17 +109,11 @@ const menuDataRouter = Router()
 // /profiles/page/
 
 function dashEscalations(req: RequestWithJwt, res: Response) {
-    const userData = getUserData(req.jwt.unique_name, req.gameVersion)
-
     const contracts: UserCentricContract[] = []
 
     for (const groupId of peacockRecentEscalations) {
-        const level = getUserEscalationProgress(userData, groupId)
-
         const userCentric = generateUserCentric(
-            controller.resolveContract(
-                controller.escalationMappings[groupId][level],
-            )!,
+            controller.resolveContract(groupId, true)!,
             req.jwt.unique_name,
             req.gameVersion,
         )
@@ -158,6 +152,11 @@ menuDataRouter.get(
 menuDataRouter.get(
     "/ChallengeLocation",
     (req: RequestWithJwt<{ locationId: string }>, res) => {
+        if (typeof req.query.locationId !== "string") {
+            res.status(400).send("Invalid locationId")
+            return
+        }
+
         const location = getVersionedConfig<PeacockLocationsData>(
             "LocationsData",
             req.gameVersion,
@@ -197,31 +196,30 @@ menuDataRouter.get("/Hub", (req: RequestWithJwt, res) => {
             ? getConfig("FrankensteinHubTemplate", false)
             : getConfig("LegacyHubTemplate", false)
 
-    if (req.gameVersion === "scpc") {
-        req.gameVersion = "h1"
-    }
-
-    const contractCreationTutorial = controller.resolveContract(
-        contractCreationTutorialId,
-    )!
+    const contractCreationTutorial =
+        req.gameVersion !== "scpc"
+            ? controller.resolveContract(contractCreationTutorialId)!
+            : undefined
 
     const locations = getVersionedConfig<PeacockLocationsData>(
         "LocationsData",
         req.gameVersion,
         true,
     )
-    const career = {
-        // TODO: Add data on elusive challenges. They are not shown on the Career->Challenges page. What the client does with this information is unclear. They are not supported by Peacock as of v5.6.2.
-        ELUSIVES_UNSUPPORTED:
-            req.gameVersion === "h3"
-                ? {
+    const career =
+        req.gameVersion === "h3"
+            ? {}
+            : {
+                  // TODO: Add data on elusive challenges. They are only shown on the Career->Challenges page for H1 and H2. They are not supported by Peacock as of v6.0.0.
+                  ELUSIVES_UNSUPPORTED: {
                       Children: [],
                       Name: "UI_MENU_PAGE_PROFILE_CHALLENGES_CATEGORY_ELUSIVE",
                       Location:
                           locations.parents["LOCATION_PARENT_ICA_FACILITY"],
-                  }
-                : {},
-    }
+                  },
+              }
+
+    const masteryData = []
 
     for (const parent in locations.parents) {
         career[parent] = {
@@ -229,13 +227,66 @@ menuDataRouter.get("/Hub", (req: RequestWithJwt, res) => {
             Location: locations.parents[parent],
             Name: locations.parents[parent].DisplayNameLocKey,
         }
+
+        // Exclude ICA Facility from showing in the Career -> Mastery page
+        if (parent === "LOCATION_PARENT_ICA_FACILITY") continue
+
+        if (
+            controller.masteryService.getMasteryDataForDestination(
+                parent,
+                req.gameVersion,
+                req.jwt.unique_name,
+            ).length
+        ) {
+            const completionData =
+                controller.masteryService.getLocationCompletion(
+                    parent,
+                    parent,
+                    req.gameVersion,
+                    req.jwt.unique_name,
+                    parent.includes("SNUG") ? "evergreen" : "mission",
+                    req.gameVersion === "h1" ? "normal" : undefined,
+                )
+
+            masteryData.push({
+                CompletionData: completionData,
+                ...(req.gameVersion === "h1"
+                    ? {
+                          Data: {
+                              normal: {
+                                  CompletionData: completionData,
+                              },
+                              pro1: {
+                                  CompletionData:
+                                      controller.masteryService.getLocationCompletion(
+                                          parent,
+                                          parent,
+                                          req.gameVersion,
+                                          req.jwt.unique_name,
+                                          parent.includes("SNUG")
+                                              ? "evergreen"
+                                              : "mission",
+                                          "pro1",
+                                      ),
+                              },
+                          },
+                      }
+                    : {}),
+                Id: locations.parents[parent].Id,
+                Image: locations.parents[parent].Properties.Icon,
+                IsLocked: locations.parents[parent].Properties.IsLocked,
+                Location: locations.parents[parent],
+                RequiredResources:
+                    locations.parents[parent].Properties.RequiredResources,
+            })
+        }
     }
 
     for (const child in locations.children) {
         if (
             child === "LOCATION_ICA_FACILITY_ARRIVAL" ||
             child === "LOCATION_HOKKAIDO_SHIM_MAMUSHI" ||
-            child.search("SNUG_") > 0
+            child.includes("SNUG_")
         ) {
             continue
         }
@@ -290,12 +341,7 @@ menuDataRouter.get("/Hub", (req: RequestWithJwt, res) => {
                 },
             },
             DashboardData: [],
-            DestinationsData:
-                req.gameVersion === "h3"
-                    ? destinationsMenu(req)
-                    : req.gameVersion === "h2"
-                    ? getConfig("H2DestinationsData", false)
-                    : getConfig("LegacyDestinations", false),
+            DestinationsData: destinationsMenu(req),
             CreateContractTutorial: generateUserCentric(
                 contractCreationTutorial,
                 req.jwt.unique_name,
@@ -306,7 +352,7 @@ menuDataRouter.get("/Hub", (req: RequestWithJwt, res) => {
                 ChallengeData: {
                     Children: Object.values(career),
                 },
-                MasteryData: {},
+                MasteryData: masteryData,
             },
             StoryData: makeCampaigns(req.gameVersion, req.jwt.unique_name),
             FilterData: getVersionedConfig(
@@ -336,13 +382,7 @@ menuDataRouter.get("/Hub", (req: RequestWithJwt, res) => {
 })
 
 menuDataRouter.get("/SafehouseCategory", (req: RequestWithJwt, res) => {
-    const exts = getUserData(req.jwt.unique_name, req.gameVersion).Extensions
-
-    const inventory = createInventory(
-        req.jwt.unique_name,
-        req.gameVersion,
-        exts.entP,
-    )
+    const inventory = createInventory(req.jwt.unique_name, req.gameVersion)
 
     const safehouseData = {
         template:
@@ -376,9 +416,14 @@ menuDataRouter.get("/SafehouseCategory", (req: RequestWithJwt, res) => {
             item.Unlockable.Type === "location" ||
             item.Unlockable.Type === "package" ||
             item.Unlockable.Type === "loadoutunlock" ||
-            item.Unlockable.Type === "agencypickup"
+            item.Unlockable.Type === "difficultyunlock" ||
+            item.Unlockable.Type === "agencypickup" ||
+            item.Unlockable.Type === "challengemultiplier"
         ) {
             continue // these types should not be displayed when not asked for
+        } else if (item.Unlockable.Properties.InclusionData) {
+            // Only sniper unlockables have inclusion data, don't show them
+            continue
         }
 
         if (
@@ -392,6 +437,7 @@ menuDataRouter.get("/SafehouseCategory", (req: RequestWithJwt, res) => {
             (cat) => cat.Category === item.Unlockable.Type,
         )
         let subcategory
+
         if (!category) {
             category = {
                 Category: item.Unlockable.Type,
@@ -493,23 +539,28 @@ menuDataRouter.get(
             ),
         }
 
-        const userData = getUserData(req.jwt.unique_name, req.gameVersion)
-
-        const inventory = createInventory(
-            req.jwt.unique_name,
-            req.gameVersion,
-            userData.Extensions.entP,
-        )
-
-        if (!req.query.slotname || !(req.query.slotid ?? undefined)) {
-            res.status(400).send("invalid?")
+        if (
+            typeof req.query.slotname !== "string" ||
+            !(req.query.slotid ?? undefined)
+        ) {
+            res.status(400).send("invalid slot data")
             return
         }
 
         let contractData: MissionManifest | undefined = undefined
+
         if (req.query.contractid) {
             contractData = controller.resolveContract(req.query.contractid)
         }
+
+        const inventory = createInventory(
+            req.jwt.unique_name,
+            req.gameVersion,
+            getSubLocationByName(
+                contractData?.Metadata.Location,
+                req.gameVersion,
+            ),
+        )
 
         if (req.query.slotname.endsWith(req.query.slotid!.toString())) {
             req.query.slotname = req.query.slotname.slice(
@@ -558,7 +609,9 @@ menuDataRouter.get(
                                 !item.Unlockable.Properties.IsContainer) &&
                             (req.query.allowlargeitems === "true" ||
                                 item.Unlockable.Properties.LoadoutSlot !==
-                                    "carriedweapon")
+                                    "carriedweapon") &&
+                            item.Unlockable.Type !== "challengemultiplier" &&
+                            !item.Unlockable.Properties.InclusionData
                         ) // not sure about this one
                     })
                     .map((item) => ({
@@ -585,7 +638,7 @@ menuDataRouter.get(
                 OptionalData: {
                     stashpoint: req.query.stashpoint || "",
                     AllowLargeItems: req.query.allowlargeitems,
-                    AllowContainers: req.query.allowcontainers, //?? true
+                    AllowContainers: req.query.allowcontainers, // ?? true
                 },
             },
             ShowSlotName: req.query.slotname,
@@ -607,32 +660,12 @@ menuDataRouter.get(
     "/missionrewards",
     (req: RequestWithJwt<{ contractSessionId: string }>, res) => {
         const { contractId } = getSession(req.jwt.unique_name)
-        const contractData = controller.resolveContract(contractId)
+        const contractData = controller.resolveContract(contractId, true)
 
         const userData = getUserData(req.jwt.unique_name, req.gameVersion)
 
         res.json({
-            template: {
-                controller: "group",
-                id: "mission_rewards",
-                selectable: false,
-                pressable: false,
-                children: [
-                    {
-                        view: "menu3.MissionRewardPage",
-                        selectable: false,
-                        pressable: false,
-                        data: {
-                            $setup: {
-                                "$set Drops": {
-                                    "$each $.Drops": "$item $.Unlockable",
-                                },
-                                $in: "$",
-                            },
-                        },
-                    },
-                ],
-            },
+            template: getConfig("MissionRewardsTemplate", false),
             data: {
                 LevelInfo: [
                     0, 6000, 12000, 18000, 24000, 30000, 36000, 42000, 48000,
@@ -645,8 +678,10 @@ menuDataRouter.get(
                 XPGain: 0,
                 Challenges: Object.values(
                     controller.challengeService.getChallengesForContract(
-                        getSession(req.jwt.unique_name).contractId,
+                        contractId,
                         req.gameVersion,
+                        req.jwt.unique_name,
+                        // TODO: Should a difficulty be passed here?
                     ),
                 )
                     .flat()
@@ -691,12 +726,12 @@ menuDataRouter.get(
 
         res.json = function fakeJsonBind(input) {
             return resJsonFunc.call(this, {
-                template: getConfig("scoreoverviewtemplate", false),
+                template: getConfig("ScoreOverviewTemplate", false),
                 data: input.data.ScoreOverview,
             })
         }
 
-        await innerMissionEnd(req, res)
+        await missionEnd(req, res)
     },
 )
 
@@ -715,16 +750,7 @@ menuDataRouter.get(
             ),
         } as CommonSelectScreenConfig
 
-        const exts = getUserData(
-            req.jwt.unique_name,
-            req.gameVersion,
-        ).Extensions
-
-        const inventory = createInventory(
-            req.jwt.unique_name,
-            req.gameVersion,
-            exts.entP,
-        )
+        const inventory = createInventory(req.jwt.unique_name, req.gameVersion)
 
         const contractData = controller.resolveContract(req.query.contractId)
 
@@ -769,14 +795,14 @@ menuDataRouter.get(
         const pickupsInScene = pickupData[scenePath]
 
         const unlockedAgencyPickups = inventory
-            .filter((item) => item.Unlockable.Type === "agencypickup")
             .filter(
                 (item) =>
+                    item.Unlockable.Type === "agencypickup" &&
                     item.Unlockable.Properties.Difficulty ===
-                    contractData.Metadata.Difficulty,
+                        contractData.Metadata.Difficulty &&
+                    item.Unlockable.Properties.RepositoryId,
             )
             .map((i) => i.Unlockable)
-            .filter((unlockable) => unlockable.Properties.RepositoryId)
 
         selectagencypickup.data = {
             Unlocked: unlockedAgencyPickups.map(
@@ -812,16 +838,7 @@ menuDataRouter.get(
             ),
         }
 
-        const exts = getUserData(
-            req.jwt.unique_name,
-            req.gameVersion,
-        ).Extensions
-
-        const inventory = createInventory(
-            req.jwt.unique_name,
-            req.gameVersion,
-            exts.entP,
-        )
+        const inventory = createInventory(req.jwt.unique_name, req.gameVersion)
 
         const contractData = controller.resolveContract(req.query.contractId)
 
@@ -847,14 +864,14 @@ menuDataRouter.get(
         const entrancesInScene = entranceData[scenePath]
 
         const unlockedEntrances = inventory
-            .filter((item) => item.Unlockable.Subtype === "startinglocation")
             .filter(
                 (item) =>
+                    item.Unlockable.Subtype === "startinglocation" &&
                     item.Unlockable.Properties.Difficulty ===
-                    contractData.Metadata.Difficulty,
+                        contractData.Metadata.Difficulty &&
+                    item.Unlockable.Properties.RepositoryId,
             )
             .map((i) => i.Unlockable)
-            .filter((unlockable) => unlockable.Properties.RepositoryId)
 
         selectEntrance.data = {
             Unlocked: unlockedEntrances.map(
@@ -914,22 +931,9 @@ menuDataRouter.get("/missionendready", async (req, res) => {
     }
 })
 
-menuDataRouter.get("/missionend", innerMissionEnd)
+menuDataRouter.get("/missionend", missionEnd)
 
-menuDataRouter.get("/scoreoverviewandunlocks", innerMissionEnd)
-
-async function innerMissionEnd(
-    req: RequestWithJwt<MissionEndRequestQuery>,
-    res: Response,
-): Promise<void> {
-    const result = controller.hooks.getMissionEnd.call(req, res)
-
-    if (result) {
-        return
-    }
-
-    await missionEnd(req, res)
-}
+menuDataRouter.get("/scoreoverviewandunlocks", missionEnd)
 
 menuDataRouter.get(
     "/Destination",
@@ -943,6 +947,13 @@ menuDataRouter.get(
         )
 
         const locationData = locData.parents[LOCATION]
+        const masteryData =
+            controller.masteryService.getMasteryDataForDestination(
+                req.query.locationId,
+                req.gameVersion,
+                req.jwt.unique_name,
+                req.query.difficulty,
+            )
 
         const response = {
             template:
@@ -952,7 +963,7 @@ menuDataRouter.get(
             data: {
                 Location: {},
                 MissionData: {
-                    ...getDestinationCompletion(locationData, req),
+                    ...getDestinationCompletion(locationData, undefined, req),
                     ...{ SubLocationMissionsData: [] },
                 },
                 ChallengeData: {
@@ -964,16 +975,24 @@ menuDataRouter.get(
                         ),
                 },
                 MasteryData:
-                    controller.masteryService.getMasteryDataForDestination(
-                        req.query.locationId,
-                        req.gameVersion,
-                        req.jwt.unique_name,
-                    ),
+                    LOCATION !== "LOCATION_PARENT_ICA_FACILITY"
+                        ? req.gameVersion === "h1"
+                            ? masteryData[0]
+                            : masteryData
+                        : {},
                 DifficultyData: undefined,
             },
         }
 
-        if (req.gameVersion === "h1") {
+        if (
+            req.gameVersion === "h1" &&
+            LOCATION !== "LOCATION_PARENT_ICA_FACILITY"
+        ) {
+            const inventory = createInventory(
+                req.jwt.unique_name,
+                req.gameVersion,
+            )
+
             response.data.DifficultyData = {
                 AvailableDifficultyModes: [
                     {
@@ -982,7 +1001,11 @@ menuDataRouter.get(
                     },
                     {
                         Name: "pro1",
-                        Available: true,
+                        Available: inventory.some(
+                            (e) =>
+                                e.Unlockable.Id ===
+                                locationData.Properties.DifficultyUnlock.pro1,
+                        ),
                     },
                 ],
                 Difficulty: req.query.difficulty,
@@ -1001,8 +1024,6 @@ menuDataRouter.get(
         response.data.Location = locationData
 
         if (req.query.difficulty === "pro1") {
-            log(LogLevel.DEBUG, "Adjusting for legacy-pro1.")
-
             const obj = {
                 Location: locationData,
                 SubLocation: locationData,
@@ -1040,16 +1061,24 @@ menuDataRouter.get(
 
             // every unique escalation from the sublocation
             const allUniqueEscalations: string[] = [
+                ...(req.gameVersion === "h1" && e.Id === "LOCATION_ICA_FACILITY"
+                    ? controller.missionsInLocations.escalations[
+                          "LOCATION_ICA_FACILITY_SHIP"
+                      ]
+                    : []),
                 ...new Set<string>(
                     controller.missionsInLocations.escalations[e.Id] || [],
                 ),
             ]
 
             for (const escalation of allUniqueEscalations) {
-                const details = getMenuDetailsForEscalation(
+                if (req.gameVersion === "h1" && no2016.includes(escalation))
+                    continue
+
+                const details = contractIdToHitObject(
                     escalation,
-                    req.jwt.unique_name,
                     req.gameVersion,
+                    req.jwt.unique_name,
                 )
 
                 if (details) {
@@ -1124,16 +1153,12 @@ menuDataRouter.get(
                 if (theMissions !== undefined) {
                     ;(theMissions as string[])
                         .filter(
-                            // removes snow festival on h1, traditions on non-h3
+                            // removes snow festival on h1
                             (m) =>
                                 m &&
                                 !(
                                     req.gameVersion === "h1" &&
                                     m === "c414a084-a7b9-43ce-b6ca-590620acd87e"
-                                ) &&
-                                !(
-                                    req.gameVersion !== "h3" &&
-                                    m === "90c291f6-7ac3-46de-99b2-082e38fccb24"
                                 ),
                         )
                         .forEach((c) => {
@@ -1186,13 +1211,7 @@ async function lookupContractPublicId(
         }
     }
 
-    const location = (
-        getVersionedConfig(
-            "allunlockables",
-            gameVersion,
-            false,
-        ) as readonly Unlockable[]
-    ).find((entry) => entry.Id === contract.Metadata.Location)
+    const location = getUnlockableById(contract.Metadata.Location, gameVersion)
 
     return {
         Contract: contract,
@@ -1204,8 +1223,8 @@ async function lookupContractPublicId(
 menuDataRouter.get(
     "/LookupContractPublicId",
     async (req: RequestWithJwt<{ publicid: string }>, res) => {
-        if (!req.query.publicid) {
-            return res.status(400).send("no public id specified!")
+        if (!req.query.publicid || typeof req.query.publicid !== "string") {
+            return res.status(400).send("no/invalid public id specified!")
         }
 
         res.json({
@@ -1271,7 +1290,6 @@ menuDataRouter.get(
 
         const cats = []
 
-        //#region Main story missions
         const currentIdIndex = orderedMissions.indexOf(req.query.contractId)
 
         if (
@@ -1303,9 +1321,7 @@ menuDataRouter.get(
 
             cats.push(createMainOpportunityTile(req.query.contractId))
         }
-        //#endregion
 
-        //#region PZ missions
         const pzIdIndex = orderedPZMissions.indexOf(req.query.contractId)
 
         if (pzIdIndex !== -1 && pzIdIndex !== orderedPZMissions.length - 1) {
@@ -1322,9 +1338,6 @@ menuDataRouter.get(
                 ),
             )
         }
-        //#endregion
-
-        //#region Atlantide
 
         if (req.query.contractId === "f1ba328f-e3dd-4ef8-bb26-0363499fdd95") {
             const nextMissionId = "0b616e62-af0c-495b-82e3-b778e82b5912"
@@ -1340,25 +1353,35 @@ menuDataRouter.get(
                 ),
             )
         }
-        //#endregion
 
-        //#region Plugin missions
+        if (sniperMissionIds.includes(req.query.contractId)) {
+            cats.push(createMenuPageTile("sniper"))
+        }
+
         const pluginData = controller.hooks.getNextCampaignMission.call(
             req.query.contractId,
             req.gameVersion,
         )
 
         if (pluginData) {
-            cats.push(
-                createPlayNextTile(
+            if (pluginData.overrideIndex !== undefined) {
+                cats[pluginData.overrideIndex] = createPlayNextTile(
                     req.jwt.unique_name,
                     pluginData.nextContractId,
                     req.gameVersion,
                     pluginData.campaignDetails,
-                ),
-            )
+                )
+            } else {
+                cats.push(
+                    createPlayNextTile(
+                        req.jwt.unique_name,
+                        pluginData.nextContractId,
+                        req.gameVersion,
+                        pluginData.campaignDetails,
+                    ),
+                )
+            }
         }
-        //#endregion
 
         res.json({
             template: getConfig("PlayNextTemplate", false),
@@ -1580,7 +1603,7 @@ menuDataRouter.post(
             specialContracts,
         )
 
-        let searchResult: contractSearchResult = undefined
+        let searchResult: ContractSearchResult
 
         if (specialContracts.length > 0) {
             // Handled by a plugin
@@ -1735,10 +1758,7 @@ menuDataRouter.get("/contractcreation/create", (req: RequestWithJwt, res) => {
                             Outfit: {
                                 RepositoryId: km.OutfitRepoId,
                                 Required: true,
-                                IsHitmanSuit: isSuit(
-                                    km.OutfitRepoId,
-                                    req.gameVersion,
-                                ),
+                                IsHitmanSuit: isSuit(km.OutfitRepoId),
                             },
                         }
                     }),
@@ -1755,7 +1775,15 @@ menuDataRouter.get("/contractcreation/create", (req: RequestWithJwt, res) => {
 
 const createLoadSaveMiddleware =
     (menuTemplate: string) =>
-    (req: RequestWithJwt<{ sessionIds?: string }, string[]>, res: Response) => {
+    (
+        req: RequestWithJwt<
+            {
+                sessionIds?: string
+            },
+            string[]
+        >,
+        res: Response,
+    ) => {
         const template = getVersionedConfig(
             menuTemplate,
             req.gameVersion,
@@ -1819,12 +1847,81 @@ menuDataRouter.post(
     createLoadSaveMiddleware("SaveMenuTemplate"),
 )
 
-//TODO: Add statistics
 menuDataRouter.get("/PlayerProfile", (req: RequestWithJwt, res) => {
     const playerProfilePage = getConfig<PlayerProfileView>(
         "PlayerProfilePage",
         true,
     )
+
+    const locationData = getVersionedConfig<PeacockLocationsData>(
+        "LocationsData",
+        req.gameVersion,
+        false,
+    )
+
+    playerProfilePage.data.SubLocationData = []
+
+    for (const subLocationKey in locationData.children) {
+        // Ewww...
+        if (
+            subLocationKey === "LOCATION_ICA_FACILITY_ARRIVAL" ||
+            subLocationKey === "LOCATION_HOKKAIDO_SHIM_MAMUSHI" ||
+            subLocationKey.includes("SNUG_")
+        ) {
+            continue
+        }
+
+        const subLocation = locationData.children[subLocationKey]
+        const parentLocation =
+            locationData.parents[subLocation.Properties.ParentLocation]
+
+        const completionData = generateCompletionData(
+            subLocation.Id,
+            req.jwt.unique_name,
+            req.gameVersion,
+        )
+
+        // TODO: Make getDestinationCompletion do something like this.
+        const challenges = controller.challengeService.getChallengesForLocation(
+            subLocation.Id,
+            req.gameVersion,
+        )
+
+        const challengeCategoryCompletion: ChallengeCategoryCompletion[] = []
+
+        for (const challengeGroup in challenges) {
+            const challengeCompletion =
+                controller.challengeService.countTotalNCompletedChallenges(
+                    {
+                        challengeGroup: challenges[challengeGroup],
+                    },
+                    req.jwt.unique_name,
+                    req.gameVersion,
+                )
+
+            challengeCategoryCompletion.push({
+                Name: challenges[challengeGroup][0].CategoryName,
+                ...challengeCompletion,
+            })
+        }
+
+        const destinationCompletion = getDestinationCompletion(
+            parentLocation,
+            subLocation,
+            req,
+        )
+
+        playerProfilePage.data.SubLocationData.push({
+            ParentLocation: parentLocation,
+            Location: subLocation,
+            CompletionData: completionData,
+            ChallengeCategoryCompletion: challengeCategoryCompletion,
+            ChallengeCompletion: destinationCompletion.ChallengeCompletion,
+            OpportunityStatistics: destinationCompletion.OpportunityStatistics,
+            LocationCompletionPercent:
+                destinationCompletion.LocationCompletionPercent,
+        })
+    }
 
     const userProfile = getUserData(req.jwt.unique_name, req.gameVersion)
     playerProfilePage.data.PlayerProfileXp.Total =
@@ -1845,11 +1942,15 @@ menuDataRouter.get("/PlayerProfile", (req: RequestWithJwt, res) => {
             f.Xp = subLocationData?.Xp || 0
             f.ActionXp = subLocationData?.ActionXp || 0
 
-            if (f.LocationProgression) {
+            if (f.LocationProgression && !isSniperLocation(f.LocationId)) {
+                // We typecast below as it could be an object for subpackages.
+                // Checks before this ensure it isn't, but TS doesn't realise this.
                 f.LocationProgression.Level =
-                    userProfile.Extensions.progression.Locations[
-                        f.LocationId.toLocaleLowerCase()
-                    ]?.Level || 1
+                    (
+                        userProfile.Extensions.progression.Locations[
+                            f.LocationId
+                        ] as ProgressionData
+                    ).Level || 1
             }
         }),
     )
@@ -1912,23 +2013,18 @@ menuDataRouter.get(
             false,
         )
 
-        const location = (() => {
+        const parentLocation = (() => {
             switch (req.query.unlockableId?.split("_").slice(0, 3).join("_")) {
                 case "FIREARMS_SC_HERO":
-                    return "LOCATION_AUSTRIA"
+                    return "LOCATION_PARENT_AUSTRIA"
                 case "FIREARMS_SC_SEAGULL":
-                    return "LOCATION_SALTY_SEAGULL"
+                    return "LOCATION_PARENT_SALTY"
                 case "FIREARMS_SC_FALCON":
-                    return "LOCATION_CAGED_FALCON"
+                    return "LOCATION_PARENT_CAGED"
                 default:
                     assert.fail("fell through switch (bad query?)")
             }
         })()
-
-        let sniperLoadout = getConfig<SniperLoadoutConfig>(
-            "SniperLoadouts",
-            false,
-        )[location][req.query.unlockableId]
 
         if (req.gameVersion === "scpc") {
             masteryUnlockTemplate = JSON.parse(
@@ -1938,33 +2034,21 @@ menuDataRouter.get(
                 ),
             )
 
-            sniperLoadout = JSON.parse(
-                JSON.stringify(sniperLoadout).replace(/hawk\/+/g, ""),
-            )
+            // Do we still need to do this? - AF
+            // sniperLoadout = JSON.parse(
+            //     JSON.stringify(sniperLoadout).replace(/hawk\/+/g, ""),
+            // )
         }
-
-        const unlockables = sniperLoadout.Unlockable
 
         res.json({
             template: masteryUnlockTemplate,
             data: {
-                CompletionData: controller.masteryService.getFirearmCompletion(
+                ...controller.masteryService.getMasteryDataForSubPackage(
+                    parentLocation,
                     req.query.unlockableId,
-                    sniperLoadout.MainUnlockable.Properties.Name,
-                    req.jwt.unique_name,
                     req.gameVersion,
+                    req.jwt.unique_name,
                 ),
-                Drops: unlockables.map((unlockable) => ({
-                    IsLevelMarker: false,
-                    Unlockable: unlockable,
-                    Level:
-                        unlockable.Properties.UnlockOrder ??
-                        DEFAULT_MASTERY_MAXLEVEL,
-                    // TODO: Everything is unlocked. Change this when adding sniper progression
-                    IsLocked: false,
-                    TypeLocaKey: "UI_MENU_PAGE_MASTERY_UNLOCKABLE_NAME_weapon",
-                })),
-                Unlockable: sniperLoadout.MainUnlockable,
             },
         })
     },
@@ -1980,6 +2064,38 @@ menuDataRouter.get(
                 req.jwt.unique_name,
             ),
         )
+    },
+)
+
+menuDataRouter.get(
+    "/GetMasteryCompletionDataForUnlockable",
+    (req: RequestWithJwt<{ unlockableId: string }>, res) => {
+        // We make this lookup table to quickly get it, there's no other quick way for it.
+        const unlockToLoc = {
+            FIREARMS_SC_HERO_SNIPER_HM: "LOCATION_PARENT_AUSTRIA",
+            FIREARMS_SC_HERO_SNIPER_KNIGHT: "LOCATION_PARENT_AUSTRIA",
+            FIREARMS_SC_HERO_SNIPER_STONE: "LOCATION_PARENT_AUSTRIA",
+            FIREARMS_SC_SEAGULL_HM: "LOCATION_PARENT_SALTY",
+            FIREARMS_SC_SEAGULL_KNIGHT: "LOCATION_PARENT_SALTY",
+            FIREARMS_SC_SEAGULL_STONE: "LOCATION_PARENT_SALTY",
+            FIREARMS_SC_FALCON_HM: "LOCATION_PARENT_CAGED",
+            FIREARMS_SC_FALCON_KNIGHT: "LOCATION_PARENT_CAGED",
+            FIREARMS_SC_FALCON_STONE: "LOCATION_PARENT_CAGED",
+        }
+
+        res.json({
+            template: null,
+            data: {
+                CompletionData: controller.masteryService.getLocationCompletion(
+                    unlockToLoc[req.query.unlockableId],
+                    unlockToLoc[req.query.unlockableId],
+                    req.gameVersion,
+                    req.jwt.unique_name,
+                    "sniper",
+                    req.query.unlockableId,
+                ),
+            },
+        })
     },
 )
 

@@ -81,12 +81,12 @@ export enum LogCategory {
 
 const LOG_LEVEL_NONE = "none"
 
-//NOTE: Tests run in "strict mode", so only enable CALLER by default for debug-mode.
+// NOTE: Tests run in "strict mode", so only enable CALLER by default for debug-mode.
 const LOG_CATEGORY_DEFAULT =
     isDebug && !isTest ? LogCategory.CALLER : LogCategory.NONE
 
-const fileLogLevel = process.env.LOG_LEVEL_FILE || LogLevel.TRACE
-const consoleLogLevel = process.env.LOG_LEVEL_CONSOLE || LogLevel.INFO
+const fileLogLevel = process.env.LOG_LEVEL_FILE || LogLevel.SILLY
+const consoleLogLevel = process.env.LOG_LEVEL_CONSOLE || LogLevel.SILLY
 const disabledLogCategories =
     process.env.LOG_CATEGORY_DISABLED?.split(",") || []
 
@@ -179,10 +179,10 @@ export function log(
     category: LogCategory | string = LOG_CATEGORY_DEFAULT,
 ): void {
     if (category === LogCategory.CALLER) {
-        category = log.caller?.name.toString() ?? "unknown"
+        category = log.caller?.name.toString() || "unknown"
     }
 
-    const message = data ?? "No message specified"
+    const message = data || "No message specified"
 
     const now = new Date()
     const stampParts: number[] = [
@@ -225,6 +225,10 @@ export function log(
             levelStringColored = picocolors.bgYellow(levelString)
             stack = new Error("Trace").stack
             break
+        case LogLevel.SILLY:
+            levelString = "Silly"
+            levelStringColored = picocolors.bgMagenta(levelString)
+            break
     }
 
     const categoryAndLevel =
@@ -265,5 +269,53 @@ export function loggingMiddleware(
         `${picocolors.green(req.method)} ${picocolors.underline(req.url)}`,
         LogCategory.HTTP,
     )
+    next?.()
+}
+
+export function requestLoggingMiddleware(
+    req: RequestWithJwt,
+    res: Response,
+    next?: NextFunction,
+): void {
+    res.once("finish", () => {
+        const debug = {
+            method: req.method,
+            url: req.url,
+            body: req.body,
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+        }
+
+        log(LogLevel.DEBUG, JSON.stringify(debug), LogCategory.HTTP)
+    })
+
+    next?.()
+}
+
+export function errorLoggingMiddleware(
+    err: Error,
+    req: RequestWithJwt,
+    res: Response,
+    next?: NextFunction,
+): void {
+    const debug = {
+        method: req.method,
+        url: req.url,
+        body: req.body,
+        error: `${err.name} - ${err.message} - ${
+            err.cause || "Unknown cause"
+        }\n${err.stack || "No stack"}`,
+    }
+
+    log(
+        LogLevel.ERROR,
+        `${picocolors.green(req.method)} ${picocolors.underline(
+            req.url,
+        )} gave an unexpected error! Please see log for details.`,
+        LogCategory.HTTP,
+    )
+
+    log(LogLevel.DEBUG, JSON.stringify(debug), LogCategory.HTTP)
+
     next?.()
 }

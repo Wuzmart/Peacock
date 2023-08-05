@@ -34,7 +34,7 @@ import {
     writeNewUserData,
 } from "./databaseHandler"
 import { OfficialServerAuth, userAuths } from "./officialServerAuth"
-import { randomUUID } from "crypto"
+import { randomUUID, randomBytes } from "crypto"
 import { clearInventoryFor } from "./inventory"
 import {
     EpicH1Strategy,
@@ -44,6 +44,12 @@ import {
     SteamH2Strategy,
     SteamScpcStrategy,
 } from "./entitlementStrategies"
+import { getFlag } from "./flags"
+
+export const JWT_SECRET =
+    getFlag("developmentAllowRuntimeRestart") || PEACOCK_DEV
+        ? "secret"
+        : randomBytes(32).toString("hex")
 
 export async function handleOauthToken(
     req: RequestWithJwt,
@@ -96,22 +102,7 @@ export async function handleOauthToken(
         external_platform = "epic"
         external_userid = req.body.epic_userid
         external_users_folder = "epicids"
-    } else {
-        res.status(406).end() // unsupported auth method
-        return
-    }
-
-    if (req.body.pId && !uuidRegex.test(req.body.pId)) {
-        res.status(400).end() // pId is not a GUID
-        return
-    }
-
-    const isHitman3 =
-        external_appid === "fghi4567xQOCheZIin0pazB47qGUvZw4" ||
-        external_appid === STEAM_NAMESPACE_2021
-
-    //#region Refresh tokens
-    if (req.body.grant_type === "refresh_token") {
+    } else if (req.body.grant_type === "refresh_token") {
         // send back the token from the request (re-signed so the timestamps update)
         extractToken(req) // init req.jwt
         // remove signOptions from existing jwt
@@ -138,15 +129,26 @@ export async function handleOauthToken(
         }
 
         res.json({
-            access_token: sign(req.jwt, "secret", signOptions),
+            access_token: sign(req.jwt, JWT_SECRET, signOptions),
             token_type: "bearer",
             expires_in: 5000,
             refresh_token: randomUUID(),
         })
 
         return
+    } else {
+        res.status(406).end() // unsupported auth method
+        return
     }
-    //#endregion
+
+    if (req.body.pId && !uuidRegex.test(req.body.pId)) {
+        res.status(400).end() // pId is not a GUID
+        return
+    }
+
+    const isHitman3 =
+        external_appid === "fghi4567xQOCheZIin0pazB47qGUvZw4" ||
+        external_appid === STEAM_NAMESPACE_2021
 
     const gameVersion: GameVersion = isFrankenstein
         ? "scpc"
@@ -195,10 +197,9 @@ export async function handleOauthToken(
     } catch (e) {
         log(LogLevel.DEBUG, "Unable to load profile information.")
     }
+
     /* 
-       Never store user auth for scpc
-       Always store user auth for H1 & H2
-       If on steam or using legacy contract downloader, then store user auth for H3 
+       Store user auth for all games except scpc
     */
     if (!isFrankenstein) {
         const authContainer = new OfficialServerAuth(
@@ -244,7 +245,6 @@ export async function handleOauthToken(
         }
     }
 
-    // eslint-disable-next-line no-inner-declarations
     async function getEntitlements(): Promise<string[]> {
         if (isFrankenstein) {
             return new SteamScpcStrategy().get()
@@ -287,6 +287,7 @@ export async function handleOauthToken(
     }
 
     const newEntP = await getEntitlements()
+
     if (newEntP.length === 0) {
         if (userData.Extensions.entP) {
             log(
@@ -323,7 +324,7 @@ export async function handleOauthToken(
     clearInventoryFor(req.body.pId)
 
     res!.json({
-        access_token: sign(userinfo, "secret", signOptions),
+        access_token: sign(userinfo, JWT_SECRET, signOptions),
         token_type: "bearer",
         expires_in: 5000,
         refresh_token: randomUUID(),

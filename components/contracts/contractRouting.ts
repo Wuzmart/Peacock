@@ -30,6 +30,7 @@ import {
     getSession,
     newSession,
     registerObjectiveListener,
+    setupScoring,
 } from "../eventHandler"
 import { controller } from "../controller"
 import { getConfig } from "../configSwizzleManager"
@@ -42,7 +43,7 @@ import type {
     RequestWithJwt,
 } from "../types/types"
 import {
-    contractIdToEscalationGroupId,
+    escalationTypes,
     getPlayEscalationInfo,
 } from "./escalations/escalationService"
 import { log, LogLevel } from "../loggingInterop"
@@ -92,12 +93,13 @@ contractRoutingRouter.post(
         // Add escalation data to Contract data HERE
         contractData.Metadata = {
             ...contractData.Metadata,
-            ...(await getPlayEscalationInfo(
-                contractData.Metadata.Type === "escalation",
-                req.jwt.unique_name,
-                contractIdToEscalationGroupId(req.body.id),
-                req.gameVersion,
-            )),
+            ...(escalationTypes.includes(contractData.Metadata.Type)
+                ? getPlayEscalationInfo(
+                      req.jwt.unique_name,
+                      contractData.Metadata.InGroup,
+                      req.gameVersion,
+                  )
+                : {}),
             ...loadoutData,
             ...{
                 OpportunityData: getContractOpportunityData(req, contractData),
@@ -108,6 +110,8 @@ contractRoutingRouter.post(
         if (contractTypes.includes(contractData.Metadata.Type)) {
             contractData.Data.EnableSaving = false
         }
+
+        // Edit elusive contract data HERE
 
         const contractSesh = {
             Contract: contractData,
@@ -218,6 +222,10 @@ contractRoutingRouter.post(
         for (const obj of contractData.Data.Objectives || []) {
             // register the objective as a tracked statemachine
             registerObjectiveListener(theSession, obj)
+        }
+
+        if (contractData.Metadata.Modules) {
+            setupScoring(theSession, contractData.Metadata.Modules)
         }
     },
 )
@@ -364,6 +372,7 @@ function getContractOpportunityData(
             if (!Object.keys(missionStories).includes(ms)) {
                 continue
             }
+
             missionStories[ms].PreviouslyCompleted =
                 ms in userData.Extensions.opportunityprogression
             const current = fastClone(missionStories[ms])

@@ -33,6 +33,7 @@ import { log, LogLevel } from "../loggingInterop"
 import { getUserData } from "../databaseHandler"
 import { controller } from "../controller"
 import {
+    escalationTypes,
     getLevelCount,
     getUserEscalationProgress,
 } from "./escalations/escalationService"
@@ -82,12 +83,33 @@ export function getSubLocationByName(
 }
 
 /**
+ * Get a parent location by name.
+ *
+ * @param name The parent location's name (e.g. `LOCATION_PARENT_ICA_FACILITY`).
+ * @param gameVersion The game's version.
+ * @returns The parent location.
+ */
+export function getParentLocationByName(
+    name: string,
+    gameVersion: GameVersion,
+): Unlockable | undefined {
+    const locationsData = getVersionedConfig<PeacockLocationsData>(
+        "LocationsData",
+        gameVersion,
+        false,
+    )
+
+    return fastClone(locationsData.parents[name])
+}
+
+/**
  * Generates a CompletionData object.
  *
  * @param subLocationId The ID of the targeted sub-location.
  * @param userId The ID of the user.
  * @param gameVersion The game's version.
  * @param contractType The type of the contract, only used to distinguish evergreen from other types (default).
+ * @param subPackageId The sub package id you want (think of mastery).
  * @returns The completion data object.
  */
 export function generateCompletionData(
@@ -95,8 +117,17 @@ export function generateCompletionData(
     userId: string,
     gameVersion: GameVersion,
     contractType = "mission",
+    subPackageId?: string,
 ): CompletionData {
     const subLocation = getSubLocationByName(subLocationId, gameVersion)
+    let difficulty = undefined
+
+    if (gameVersion === "h1") {
+        difficulty = getUserData(userId, gameVersion).Extensions
+            .gamepersistentdata.menudata.difficulty.destinations[
+            subLocation ? subLocation.Properties?.ParentLocation : subLocationId
+        ]
+    }
 
     const locationId = subLocation
         ? subLocation.Properties?.ParentLocation
@@ -108,14 +139,17 @@ export function generateCompletionData(
         gameVersion,
         userId,
         contractType,
+        subPackageId ? subPackageId : difficulty,
     )
 
     if (!completionData) {
-        // Should only reach here for sniper locations.
+        // Should only reach here for sniper locations with no subpackage id
+        // specified or the ICA Facility in H2016.
         return {
             Level: 1,
             MaxLevel: 1,
             XP: 0,
+            PreviouslySeenXp: 0,
             Completion: 1.0,
             XpLeft: 0,
             Id: locationId,
@@ -170,16 +204,22 @@ export function generateUserCentric(
     const played = userData.Extensions?.PeacockPlayedContracts
     const id = contractData.Metadata.Id
 
+    const completionData = generateCompletionData(
+        contractData.Metadata.Location,
+        userId,
+        gameVersion,
+    )
+
     const uc: UserCentricContract = {
         Contract: contractData,
         Data: {
             IsLocked: subLocation?.Properties?.IsLocked || false,
             LockedReason: "",
-            LocationLevel: 1,
-            LocationMaxLevel: 1,
-            LocationCompletion: 1,
-            LocationXpLeft: 0,
-            LocationHideProgression: false,
+            LocationLevel: completionData.Level,
+            LocationMaxLevel: completionData.MaxLevel,
+            LocationCompletion: completionData.Completion,
+            LocationXpLeft: completionData.XpLeft,
+            LocationHideProgression: completionData.HideProgression,
             ElusiveContractState: "",
             IsFeatured: false,
             LastPlayedAt:
@@ -196,39 +236,33 @@ export function generateUserCentric(
             Completed: played[id] === undefined ? false : played[id]?.Completed,
             LocationId: subLocation.Id,
             ParentLocationId: subLocation.Properties.ParentLocation!,
-            CompletionData: generateCompletionData(
-                contractData.Metadata.Location,
-                userId,
-                gameVersion,
-            ),
+            CompletionData: completionData,
             DlcName: subLocation.Properties.DlcName!,
             DlcImage: subLocation.Properties.DlcImage!,
         },
     }
 
-    if (contractData.Metadata.Type === "escalation") {
-        const eGroupId = contractData.Metadata.InGroup
+    if (escalationTypes.includes(contractData.Metadata.Type)) {
+        const eGroupId =
+            contractData.Metadata.InGroup ?? contractData.Metadata.Id
 
-        if (eGroupId) {
-            const p = getUserEscalationProgress(userData, eGroupId)
+        const p = getUserEscalationProgress(userData, eGroupId)
 
-            log(
-                LogLevel.DEBUG,
-                `Get EscalationUCProps - group: ${eGroupId} prog: ${p}`,
-            )
+        log(
+            LogLevel.DEBUG,
+            `Get EscalationUCProps - group: ${eGroupId} prog: ${p}`,
+        )
 
-            // I have absolutely no idea why,
-            // but this is incorrect on the destinations
-            // screen unless we do proper count - 1
-            // ANOTHER NOTE - Anthony:
-            // this currently doesn't mark it as completed when it is,
-            // unknown to why
-            uc.Data.EscalationCompletedLevels = p - 1
-            uc.Data.EscalationTotalLevels = getLevelCount(
-                controller.escalationMappings[eGroupId],
-            )
-            uc.Data.InGroup = eGroupId
-        }
+        // Probably not needed, just in case though.
+        delete uc.Data.Completed
+
+        uc.Data.EscalationCompletedLevels = p - 1
+        uc.Data.EscalationTotalLevels = getLevelCount(
+            controller.resolveContract(eGroupId),
+        )
+        uc.Data.EscalationCompleted =
+            userData.Extensions.PeacockCompletedEscalations.includes(eGroupId)
+        if (contractData.Metadata.InGroup) uc.Data.InGroup = eGroupId
     }
 
     return uc
@@ -264,9 +298,11 @@ export function mapObjectives(
                 true,
             ),
         }
+
         for (const gamechangerId of gameChangers) {
             if (isEvergreenSafehouse) break
             const gameChangerProps = gameChangerData[gamechangerId]
+
             if (gameChangerProps) {
                 if (gameChangerProps.IsHidden) {
                     if (gameChangerProps.Objectives?.length === 1) {
@@ -276,6 +312,24 @@ export function mapObjectives(
                         gameChangerObjectives.push(objective)
                     }
                 } else {
+                    if (!gameChangerProps.ObjectivesCategory) {
+                        gameChangerProps.ObjectivesCategory = (() => {
+                            let obj: MissionManifestObjective
+
+                            for (obj of gameChangerProps.Objectives) {
+                                if (obj.Category === "primary") return "primary"
+                                if (obj.Category === "secondary")
+                                    return "secondary"
+                            }
+
+                            // If we've not hit a primary or secondary objective, we've hit a condition
+                            // I'm not exactly sure if below follows what official does - AF
+                            // EDIT: Turns out, conditions still show as optional, setting this to
+                            //       primary for now, awaiting future investigation - AF
+                            return "primary"
+                        })()
+                    }
+
                     result.set(gamechangerId, {
                         Type: "gamechanger",
                         Properties: {
@@ -301,6 +355,7 @@ export function mapObjectives(
         if (!objective.Category) {
             objective.Category = objective.Primary ? "primary" : "secondary"
         }
+
         if (
             objective.Activation ||
             (objective.OnActive?.IfInProgress &&
@@ -336,6 +391,7 @@ export function mapObjectives(
             )
         ) {
             let id: string | null | undefined = null
+
             if (
                 objective.Definition?.Context?.Targets &&
                 (objective.Definition.Context.Targets as string[]).length === 1
@@ -411,14 +467,17 @@ export function mapObjectives(
 
     const sortedResult: MissionManifestObjective[] = []
     const resultIds: Set<string> = new Set()
+
     for (const { Id, IsNew } of displayOrder || []) {
         if (!resultIds.has(Id)) {
             // if not yet added
             const objective = result.get(Id)
+
             if (objective) {
                 if (IsNew) {
                     objective.Properties.IsNew = true
                 }
+
                 sortedResult.push(objective)
                 resultIds.add(Id)
             }
@@ -437,6 +496,7 @@ export function mapObjectives(
     ).concat((gameChangers || []).map((x) => ({ Id: x })))) {
         if (!resultIds.has(Id)) {
             const resultobjective = result.get(Id)
+
             if (
                 resultobjective &&
                 (!ExcludeFromScoring || ForceShowOnLoadingScreen)
